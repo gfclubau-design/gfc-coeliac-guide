@@ -164,6 +164,11 @@ $('stateSel').addEventListener('change', function(){
     { k:'tag',  val:16, icon: '&#127848;', label: 'Sugar-free' }
   ];
   defs.forEach(function(d, i){
+    if (d.k !== 'all' && d.k !== 'tier') {
+      var hit = 0;
+      for (var z = 0; z < N; z++) { if ((TAGS[z] || 0) & d.val) hit++; }
+      if (hit === 0) return; /* no venues carry this tag yet - hide the chip */
+    }
     var b = document.createElement('button');
     b.className = 'wchip' + (i === 0 ? ' on' : '');
     b.innerHTML = '<span class="wicon">' + d.icon + '</span><small>' + d.label + '</small>';
