@@ -227,7 +227,7 @@ $('mapToggle').addEventListener('click', function(){
   var w = document.getElementById('mapwrap');
   var showing = !w.hidden;
   w.hidden = showing;
-  this.innerHTML = showing ? '&#128506;&#65039; Show map' : '&#128196; Hide map';
+  this.innerHTML = showing ? '&#128196; Hide map' : '&#128506;&#65039; Show map';
   if (!showing) { initMap(); setTimeout(function(){ map.invalidateSize(); renderPins(); }, 80); }
   else { window.scrollTo(0, document.getElementById('listmeta').offsetTop - 60); }
 });
