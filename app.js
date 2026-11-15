@@ -6,8 +6,8 @@ var FORM_URL = 'https://forms.gle/b7gmN3HLygfZ3maq5';
 
 /* tier codes in venues.js: 0=has GF options, 1=accredited, 2=100% GF, 3=GF donuts only */
 var TIERS = {
-  0: { cls:'has',   label:'HAS GF OPTIONS',              sub:'community added - not yet verified by reviews', color:'#4A7FB5', pin:'#4A7FB5' },
-  1: { cls:'acc',   label:'COELIAC AUSTRALIA ACCREDITED',sub:'Accredited by Coeliac Australia',               color:'#7FB3D9', pin:'#8EC6E8' },
+  0: { cls:'has',   label:'HAS GF OPTIONS',              sub:'community added - not yet verified by reviews', color:'#E8720C', pin:'#F97316' },
+  1: { cls:'acc',   label:'COELIAC AUSTRALIA ACCREDITED',sub:'Accredited by Coeliac Australia',               color:'#2E7D46', pin:'#2E7D46' },
   2: { cls:'full',  label:'100% GLUTEN FREE',            sub:'Everything made gluten free',                   color:'#C88A1E', pin:'#E8A33D' },
   3: { cls:'donut', label:'GF DONUTS ONLY',              sub:'GF donuts / dedicated treats only',             color:'#8A8378', pin:'#A89F92' }
 };
@@ -174,7 +174,7 @@ function initMap(){
   if (map) { setTimeout(function(){ map.invalidateSize(); }, 50); return; }
   if (typeof L === 'undefined') { $('map').innerHTML = '<div style="padding:40px;text-align:center;color:#6B7A6E">Map failed to load - check your connection.</div>'; return; }
   map = L.map('map', { preferCanvas: true }).setView([-27.47, 153.03], 9);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(map);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19, subdomains: 'abcd', attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>' }).addTo(map);
   markers = L.layerGroup().addTo(map);
   map.on('moveend zoomend', renderPins);
   renderPins();
@@ -339,7 +339,7 @@ function openVenue(idx){
   setTimeout(function(){
     if (typeof L === 'undefined' || !$('vmap')) return;
     var vm = L.map('vmap', { scrollWheelZoom: false, dragging: true });
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap contributors' }).addTo(vm);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap contributors' }).addTo(vm);
     L.circleMarker([v[2], v[3]], { radius: 8, color: '#fff', weight: 2, fillColor: t.pin, fillOpacity: 1 }).addTo(vm).bindPopup(esc(v[0]));
     vm.setView([v[2], v[3]], 14);
     window.__vmap = vm;
