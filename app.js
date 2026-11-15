@@ -49,7 +49,7 @@ var TAG_META = {
   2:  { icon: '&#128220;', label: 'Dedicated GF menu' },
   4:  { icon: '&#9989;',  label: 'Coeliac accredited' },
   8:  { icon: '&#127849;', label: 'GF donuts' },
-  16: { icon: '&#127848;', label: 'Sugar-free friendly' }
+  16: { icon: '&#127838;', label: 'GF bread available' }
 };
 function matchVenue(i){
   var f = window.__iconFilter;
@@ -162,7 +162,7 @@ $('stateSel').addEventListener('change', function(){
     { k:'tier', val:0, icon: '&#127860;', label: 'GF options' },
     { k:'tier', val:3, icon: '&#127849;', label: 'Donuts' },
     { k:'tag',  val:1, icon: '&#127839;', label: 'Fryer' },
-    { k:'tag',  val:16, icon: '&#127848;', label: 'Sugar-free' }
+    { k:'tag',  val:16, icon: '&#127838;', label: 'Bread' }
   ];
   defs.forEach(function(d, i){
     if (d.k !== 'all' && d.k !== 'tier') {
@@ -280,6 +280,14 @@ function requestGeo(){
       : 'Could not get your location - search by name or state instead.';
   }, { timeout: 10000 });
 }
+
+/* ---------- bread tag derivation (bit 16) ---------- */
+(function(){
+  for (var i = 0; i < N; i++) {
+    var t = (VENUES[i][0] + ' ' + (VENUES[i][4] || '')).toLowerCase();
+    if (t.indexOf('bread') !== -1 || t.indexOf('bakery') !== -1 || t.indexOf('bakehouse') !== -1) TAGS[i] = (TAGS[i] || 0) | 16;
+  }
+})();
 
 /* ---------- suburb enrichment (search by suburb) ---------- */
 var SUBURBS = {};
@@ -529,7 +537,7 @@ $('saveEmail').addEventListener('click', function(){
 
 /* ---------- service worker ---------- */
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js?build=14').catch(function(){});
+  navigator.serviceWorker.register('sw.js?build=15').catch(function(){});
 }
 
 /* ---------- initial list ---------- */
