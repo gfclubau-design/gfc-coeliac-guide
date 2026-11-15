@@ -53,7 +53,10 @@ var TAG_META = {
 function matchVenue(i){
   var f = window.__iconFilter;
   if (!f || f.kind === 'all') return true;
-  if (f.kind === 'tier') return VENUES[i][5] === f.val;
+  if (f.kind === 'tier') {
+    var tMap = {0:'has', 1:'acc', 2:'full', 3:'donut'};
+    return VENUES[i][5] === tMap[f.val];
+  }
   return ((TAGS[i] || 0) & f.val) !== 0;
 }
 function distLabel(km){
@@ -189,7 +192,7 @@ function renderPins(){
     var v = VENUES[i];
     if (v[2] === 0 && v[3] === 0) continue;
     if (v[2] < b.getSouth() || v[2] > b.getNorth() || v[3] < b.getWest() || v[3] > b.getEast()) continue;
-    if (!st || v[1] !== st) continue;
+    if (st && v[1] !== st) continue;
     if (q && SEARCH[i].indexOf(q) === -1) continue;
     if (!matchVenue(i)) continue;
     if (!markerIdx[i]) {
