@@ -281,6 +281,18 @@ function requestGeo(){
   }, { timeout: 10000 });
 }
 
+/* ---------- suburb enrichment (search by suburb) ---------- */
+var SUBURBS = {};
+fetch('./suburbs.json').then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
+  if (!d) return;
+  SUBURBS = d;
+  for (var k in d) {
+    var i = parseInt(k, 10);
+    if (SEARCH[i] && d[k]) SEARCH[i] += ' ' + String(d[k]).toLowerCase();
+  }
+  if ($('page-nearme').classList.contains('on')) { renderList(); if (window.map) renderPins(); }
+}).catch(function(){});
+
 /* ---------- share the app ---------- */
 var SHARE = { title: 'GFC Coeliac Guide', text: 'Gluten-free places near you, verified by real club members', url: 'https://gfclubau-design.github.io/gfc-coeliac-guide/' };
 if ($('shareBtn')) $('shareBtn').addEventListener('click', function(){
