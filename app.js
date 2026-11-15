@@ -62,13 +62,23 @@ var TAG_META = {
   8:  { icon: '&#127849;', label: 'GF donuts' },
   16: { icon: '&#127838;', label: 'GF bread available' }
 };
+/* WikiCamps-style three-state matching: chip states are 'must' (venue must
+   have it), 'hide' (exclude venues that have it) or null (don't care).
+   Must-tiers combine as OR (show any of them); must-tags combine as AND. */
 function matchVenue(i){
-  var f = window.__iconFilter;
-  if (!f || f.kind === 'all') return true;
-  if (f.kind === 'tier') {
-    return VENUES[i][5] === f.val;
+  var S = window.__chipState || {};
+  var mustT = [], hideT = [], mustG = 0, hideG = 0;
+  for (var k in S) {
+    if (!S[k]) continue;
+    var kind = k.split('-')[0], val = +k.split('-')[1];
+    if (S[k] === 'must') { if (kind === 'tier') mustT.push(val); else mustG |= val; }
+    else { if (kind === 'tier') hideT.push(val); else hideG |= val; }
   }
-  return ((TAGS[i] || 0) & f.val) !== 0;
+  if (mustT.length && mustT.indexOf(VENUES[i][5]) === -1) return false;
+  if (hideT.indexOf(VENUES[i][5]) !== -1) return false;
+  if (mustG && ((TAGS[i] || 0) & mustG) !== mustG) return false;
+  if (hideG && ((TAGS[i] || 0) & hideG)) return false;
+  return true;
 }
 function distLabel(km){
   if (km < 1) return Math.round(km*1000) + ' m away';
@@ -191,13 +201,27 @@ $('stateSel').addEventListener('change', function(){
     }
     var b = document.createElement('button');
     b.className = 'wchip' + (i === 0 ? ' on' : '');
+    b.title = 'Tap once: must have. Tap twice: hide. Tap again: off.';
     b.innerHTML = '<span class="wicon">' + d.icon + '</span><small>' + d.label + '</small>';
-    b.addEventListener('click', function(){
-      wrap.querySelectorAll('.wchip').forEach(function(x){ x.classList.remove('on'); });
-      b.classList.add('on');
-      window.__iconFilter = d.k === 'all' ? null : { kind: d.k, val: d.val };
-      renderList(); applyPinFilter();
-    });
+    if (i === 0) {
+      /* All resets every chip to don't-care */
+      b.addEventListener('click', function(){
+        window.__chipState = {};
+        wrap.querySelectorAll('.wchip').forEach(function(x){ x.classList.remove('on','avoid'); });
+        b.classList.add('on');
+        renderList(); applyPinFilter();
+      });
+    } else {
+      b.addEventListener('click', function(){
+        window.__chipState = window.__chipState || {};
+        var key = d.k + '-' + d.val;
+        var cur = window.__chipState[key] || null;
+        window.__chipState[key] = cur === null ? 'must' : cur === 'must' ? 'hide' : null;
+        b.classList.toggle('on', window.__chipState[key] === 'must');
+        b.classList.toggle('avoid', window.__chipState[key] === 'hide');
+        renderList(); applyPinFilter();
+      });
+    }
     wrap.appendChild(b);
   });
 })();
@@ -210,36 +234,70 @@ function initMap(){
   map = L.map('map', { preferCanvas: true }).setView([-27.47, 153.03], 9);
   L.tileLayer('https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> style &copy; <a href="https://www.hotosm.org/">Humanitarian OSM Team</a>' }).addTo(map);
   markers = L.layerGroup().addTo(map);
+  var cnt = document.createElement('div');
+  cnt.id = 'mapcount';
+  document.getElementById('mapwrap').appendChild(cnt);
   map.on('moveend zoomend', renderPins);
   renderPins();
   renderList();
+}
+/* WikiCamps-style rendering: draw matching venues in view; when the viewport
+   is crowded, grid-cluster them into numbered circles that split on zoom. */
+function addSinglePin(idx){
+  if (!markerIdx[idx]) {
+    (function(ix){
+      var vv = VENUES[ix];
+      var m = L.circleMarker([vv[2], vv[3]], {
+        radius: 8, weight: 2, color: '#fff', fillColor: TIERS[vv[5]].pin, fillOpacity: 0.95
+      });
+      m.on('click', function(){ showMapCard(ix); });
+      markerIdx[ix] = m;
+    })(idx);
+  }
+  if (!map.hasLayer(markerIdx[idx])) markerIdx[idx].addTo(markers);
 }
 function renderPins(){
   if (!map || !markers) return;
   var b = map.getBounds(), st = $('stateSel').value, q = $('q').value.trim().toLowerCase();
   markers.clearLayers();
-  var drawn = 0;
-  var inb = [];
-  for (var i = 0; i < N && drawn < 400; i++) {
+  var pts = [];
+  for (var i = 0; i < N; i++) {
     var v = VENUES[i];
     if (v[2] === 0 && v[3] === 0) continue;
     if (v[2] < b.getSouth() || v[2] > b.getNorth() || v[3] < b.getWest() || v[3] > b.getEast()) continue;
     if (st && v[1] !== st) continue;
     if (q && SEARCH[i].indexOf(q) === -1) continue;
     if (!matchVenue(i)) continue;
-    if (!markerIdx[i]) {
-      (function(idx){
-        var vv = VENUES[idx];
-        var m = L.circleMarker([vv[2], vv[3]], {
-          radius: 8, weight: 2, color: '#fff', fillColor: TIERS[vv[5]].pin, fillOpacity: 0.95
-        });
-        m.on('click', function(){ showMapCard(idx); });
-        markerIdx[idx] = m;
-      })(i);
-    }
-    if (!map.hasLayer(markerIdx[i])) markerIdx[i].addTo(markers);
-    drawn++;
+    pts.push(i);
   }
+  var cnt = document.getElementById('mapcount');
+  if (cnt) cnt.textContent = fmt(pts.length) + ' venues in view';
+  if (pts.length <= 350) { pts.forEach(addSinglePin); return; }
+  /* grid clustering at the current zoom: 64px cells */
+  var CELL = 64, cells = {}, z = map.getZoom();
+  pts.forEach(function(i){
+    var p = map.project([VENUES[i][2], VENUES[i][3]], z);
+    var key = Math.floor(p.x / CELL) + ':' + Math.floor(p.y / CELL);
+    (cells[key] = cells[key] || []).push(i);
+  });
+  Object.keys(cells).forEach(function(k){
+    var g = cells[k];
+    if (g.length === 1) { addSinglePin(g[0]); return; }
+    var lat = 0, lng = 0, tiers = {};
+    g.forEach(function(i){
+      lat += VENUES[i][2]; lng += VENUES[i][3];
+      tiers[VENUES[i][5]] = (tiers[VENUES[i][5]] || 0) + 1;
+    });
+    lat /= g.length; lng /= g.length;
+    var domTier = +Object.keys(tiers).sort(function(a,b){ return tiers[b] - tiers[a]; })[0];
+    var c = L.marker([lat, lng], { icon: L.divIcon({
+      className: '',
+      html: '<div class="pcluster" style="background:' + TIERS[domTier].pin + '">' + g.length + '</div>',
+      iconSize: [36, 36], iconAnchor: [18, 18]
+    })});
+    c.on('click', function(){ map.setView([lat, lng], Math.min(z + 2, 16)); });
+    c.addTo(markers);
+  });
 }
 function showMapCard(idx){
   var v = VENUES[idx], t = TIERS[v[5]], card = $('mapcard');
@@ -556,7 +614,7 @@ $('saveEmail').addEventListener('click', function(){
 
 /* ---------- service worker ---------- */
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js?build=19').catch(function(){});
+  navigator.serviceWorker.register('sw.js?build=20').catch(function(){});
 }
 
 /* ---------- initial list ---------- */
