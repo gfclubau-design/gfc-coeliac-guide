@@ -24,6 +24,10 @@ for (var i = 0; i < N; i++) {
 }
 function fmt(n){ return n.toLocaleString('en-AU'); }
 document.getElementById('statcount').textContent = fmt(N) + ' venues';
+/* community voices from the Facebook mining (seeded, attributed, linked) */
+var SEED = [];
+fetch('reviews-seed.json').then(function(r){ return r.json(); }).then(function(d){ SEED = d; if (curVenue !== null) { renderSeed(); renderRevList(); } }).catch(function(){});
+window.addEventListener('load', function(){ if (SEED.length && curVenue !== null) renderSeed(); });
 
 /* ---------- helpers ---------- */
 function $(id){ return document.getElementById(id); }
@@ -108,7 +112,11 @@ function renderList(){
   }
   /* distance sort if we have a fix */
   var geo = window.__geo;
-  if (geo) idxs.sort(function(a,b){ return haversine(geo.lat, geo.lng, VENUES[a][2], VENUES[a][3]) - haversine(geo.lat, geo.lng, VENUES[b][2], VENUES[b][3]); });
+  if (geo) idxs.sort(function(a,b){
+    var va = (VENUES[a][2] === 0 && VENUES[a][3] === 0) ? 1e12 : haversine(geo.lat, geo.lng, VENUES[a][2], VENUES[a][3]);
+    var vb = (VENUES[b][2] === 0 && VENUES[b][3] === 0) ? 1e12 : haversine(geo.lat, geo.lng, VENUES[b][2], VENUES[b][3]);
+    return va - vb;
+  });
 
   var total = idxs.length, show = idxs.slice(0, 300);
   curList = show;
@@ -179,6 +187,7 @@ function renderPins(){
   var inb = [];
   for (var i = 0; i < N && drawn < 400; i++) {
     var v = VENUES[i];
+    if (v[2] === 0 && v[3] === 0) continue;
     if (v[2] < b.getSouth() || v[2] > b.getNorth() || v[3] < b.getWest() || v[3] > b.getEast()) continue;
     if (!st || v[1] !== st) continue;
     if (q && SEARCH[i].indexOf(q) === -1) continue;
@@ -261,6 +270,7 @@ var curVenue = null, curStars = 0, curChecks = {}, curMenuFile = '', curFoodFile
 function openVenue(idx){
   curVenue = idx;
   var v = VENUES[idx], t = TIERS[v[5]];
+  setTimeout(function(){ renderSeed(); renderRevList(); }, 0);
   var saved = getSaved().indexOf(idx) !== -1;
   var revs = getReviews()[idx] || [];
   var html =
@@ -281,8 +291,9 @@ function openVenue(idx){
       '<a class="btn dirbtn" href="https://www.google.com/maps/dir/?api=1&destination=' + v[2] + ',' + v[3] + '" target="_blank" rel="noopener">&#129686; Directions</a>' +
       (WEBSITES[idx] ? '<a class="btn dirbtn web" href="' + esc(WEBSITES[idx]) + '" target="_blank" rel="noopener">&#127760; Website</a>' : '') +
     '</div>' +
-    '<div id="vmap"></div>' +
+    ((v[2] !== 0 || v[3] !== 0) ? '<div id="vmap"></div>' : '') +
     '<div class="safety">' + SAFETY_LINE + '</div>' +
+    '<div id="seedBox"></div>' +
     '<div class="revsec"><h3>Leave a review (demo)</h3>' +
     '<div class="starrow" id="starRow"></div>' +
     '<div class="checks">' +
@@ -420,6 +431,28 @@ function renderYouReviews(){
     });
   });
   $('youReviews').innerHTML = html || '<div class="empty">No reviews yet - open a venue and leave the first one.</div>';
+}
+/* ---------- community voices (seeded) ---------- */
+function renderSeed(){
+  var box = $('seedBox');
+  if (!box) return;
+  var list = SEED.filter(function(r){ return r.idx === curVenue; });
+  if (!list.length) { box.innerHTML = ''; return; }
+  var h = '<div class="seedsec"><h3>Community voices <span class="seedtag">' + list.length + '</span></h3>';
+  for (var i = 0; i < list.length; i++) {
+    var r = list[i];
+    var neg = r.sent === 'negative' || r.sent === 'mixed';
+    h += '<div class="seedq' + (neg ? ' warn' : '') + '">' +
+      '<div class="sq">' + esc(r.text) + '</div>' +
+      '<div class="smeta">' + esc(r.author) + ' &middot; ' + esc(r.src) + (r.date ? ' &middot; ' + esc(r.date) : '') +
+      (r.link ? ' &middot; <a href="' + esc(r.link) + '" target="_blank" rel="noopener">original post</a>' : '') + '</div>';
+    if (r.practices && r.practices.length) {
+      h += '<div class="sprac">' + r.practices.map(function(p){ return '<span>' + esc(p) + '</span>'; }).join('') + '</div>';
+    }
+    h += '</div>';
+  }
+  h += '<div class="snote">Community voices are quotes from public gluten-free Facebook groups, attributed and linked.</div></div>';
+  box.innerHTML = h;
 }
 function bindListItems(ids){
   ids.forEach(function(id){
