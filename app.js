@@ -103,13 +103,21 @@ $('go-scan').addEventListener('click', function(){ showTab('page-scan'); });
     var v = VENUES[idx], t = TIERS[v[5]];
     html += '<div class="venue" data-idx="' + idx + '" style="cursor:pointer">' +
       '<div class="vh"><div class="vt"><b>' + esc(v[0]) + '</b>' +
-      '<div class="meta">' + esc(v[1]) + (v[4] ? ' &middot; ' + esc(v[4].slice(0,70)) : '') + '</div></div>' +
+      '<div class="meta">' + esc(v[1]) + (v[4] ? ' &middot; ' + esc(v[4].slice(0,70)) : '') + '</div>' +
+      '<div class="ftag">Community pick</div></div>' +
       '<span class="tier ' + t.cls + '">' + t.label + '</span></div></div>';
   });
+  /* paid featured slot demo - venues buy a top-5 slot; until one is sold,
+     show an availability card that opens the venue application form */
+  html += '<div class="venue paidslot" style="cursor:pointer" id="featuredSlot">' +
+    '<div class="vh"><div class="vt"><b>&#9733; Feature your venue here</b>' +
+    '<div class="meta">Paid placement for local venues - ask about a founding spot</div></div></div></div>';
   $('featured').innerHTML = html;
-  $('featured').querySelectorAll('.venue').forEach(function(el){
+  $('featured').querySelectorAll('.venue[data-idx]').forEach(function(el){
     el.addEventListener('click', function(){ openVenue(+el.getAttribute('data-idx')); });
   });
+  var slot = document.getElementById('featuredSlot');
+  if (slot) slot.addEventListener('click', function(){ window.open(FORM_URL, '_blank'); });
 })();
 
 /* ---------- venue list rendering ---------- */
@@ -548,7 +556,7 @@ $('saveEmail').addEventListener('click', function(){
 
 /* ---------- service worker ---------- */
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js?build=18').catch(function(){});
+  navigator.serviceWorker.register('sw.js?build=19').catch(function(){});
 }
 
 /* ---------- initial list ---------- */
