@@ -160,3 +160,20 @@ input.comment{width:100%;border:1px solid var(--border);border-radius:12px;paddi
 .maptoggle{display:block;width:100%;margin:10px 0 4px;padding:11px;background:#fff;border:1.5px solid var(--gold);color:#7A5A1E;font-weight:700;font-size:13.5px;border-radius:14px;cursor:pointer}
 
 .logoimg{width:58px;height:58px;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.12);flex:none;background:#fff}
+
+/* WikiCamps-style icon filter bar */
+#tierChips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px;-webkit-overflow-scrolling:touch}
+.wchip{flex:none;background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:8px 10px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;min-width:64px}
+.wchip .wicon{font-size:20px;line-height:1}
+.wchip small{font-size:10px;color:#4A564D;font-weight:700}
+.wchip.on{border-color:var(--green);background:#E9F3EC}
+.wchip.on small{color:var(--green)}
+/* venue page: tag icons row + actions */
+.iconrow{display:flex;gap:8px;overflow-x:auto;margin:10px 0 4px;-webkit-overflow-scrolling:touch}
+.vic{flex:none;background:var(--mint);border-radius:12px;padding:6px 9px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.vic{font-size:18px}
+.vic small{font-size:9.5px;color:#2E4A33;font-weight:700}
+.vic.none{background:#F3F1EC;color:#8A948B;font-size:11px}
+.actrow{display:flex;gap:8px;margin:10px 0 6px}
+.dirbtn{flex:1;text-align:center;background:var(--green);color:#fff;font-weight:700;font-size:13px;border-radius:12px;padding:11px 8px;text-decoration:none;display:inline-block}
+.dirbtn.web{background:#fff;color:var(--green);border:1.5px solid var(--green)}

@@ -38,6 +38,20 @@ function haversine(lat1, lng1, lat2, lng2){
   var a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
+/* WikiCamps-style tag filters: bitfield TAGS from the community map notes */
+var TAG_META = {
+  1:  { icon: '&#127839;', label: 'Separate fryer' },
+  2:  { icon: '&#128220;', label: 'Dedicated GF menu' },
+  4:  { icon: '&#9989;',  label: 'Coeliac accredited' },
+  8:  { icon: '&#127849;', label: 'GF donuts' },
+  16: { icon: '&#127848;', label: 'Sugar-free friendly' }
+};
+function matchVenue(i){
+  var f = window.__iconFilter;
+  if (!f || f.kind === 'all') return true;
+  if (f.kind === 'tier') return VENUES[i][5] === f.val;
+  return ((TAGS[i] || 0) & f.val) !== 0;
+}
 function distLabel(km){
   if (km < 1) return Math.round(km*1000) + ' m away';
   if (km < 20) return km.toFixed(1) + ' km away';
@@ -85,11 +99,10 @@ var curList = [];
 function renderList(){
   var q = $('q').value.trim().toLowerCase();
   var st = $('stateSel').value;
-  var tier = window.__tierFilter;
   var idxs = [];
   for (var i = 0; i < N; i++) {
     if (st && VENUES[i][1] !== st) continue;
-    if (tier !== undefined && tier !== null && VENUES[i][5] !== tier) continue;
+    if (!matchVenue(i)) continue;
     if (q && SEARCH[i].indexOf(q) === -1) continue;
     idxs.push(i);
   }
@@ -121,26 +134,29 @@ $('stateSel').addEventListener('change', renderList);
   var sel = $('stateSel');
   opts.forEach(function(s){ var o = document.createElement('option'); o.value = s; o.textContent = s; sel.appendChild(o); });
 })();
-/* tier chips */
+/* WikiCamps-style icon filter bar */
 (function(){
   var wrap = $('tierChips');
-  var chip = document.createElement('button');
-  chip.className = 'fchip on'; chip.textContent = 'All'; chip.dataset.tier = '';
-  wrap.appendChild(chip);
-  [2,1,0,3].forEach(function(tc){
+  var defs = [
+    { k:'all',        icon: '&#128204;', label: 'All' },
+    { k:'tier', val:2, icon: '&#127942;', label: '100% GF' },
+    { k:'tier', val:1, icon: '&#9989;',  label: 'Accredited' },
+    { k:'tier', val:0, icon: '&#127860;', label: 'GF options' },
+    { k:'tier', val:3, icon: '&#127849;', label: 'Donuts' },
+    { k:'tag',  val:1, icon: '&#127839;', label: 'Fryer' },
+    { k:'tag',  val:16, icon: '&#127848;', label: 'Sugar-free' }
+  ];
+  defs.forEach(function(d, i){
     var b = document.createElement('button');
-    b.className = 'fchip';
-    b.innerHTML = '<span class="dot" style="background:' + TIERS[tc].pin + '"></span>' + TIERS[tc].label;
-    b.dataset.tier = tc;
-    wrap.appendChild(b);
-  });
-  wrap.querySelectorAll('.fchip').forEach(function(b){
+    b.className = 'wchip' + (i === 0 ? ' on' : '');
+    b.innerHTML = '<span class="wicon">' + d.icon + '</span><small>' + d.label + '</small>';
     b.addEventListener('click', function(){
-      wrap.querySelectorAll('.fchip').forEach(function(x){ x.classList.remove('on'); });
+      wrap.querySelectorAll('.wchip').forEach(function(x){ x.classList.remove('on'); });
       b.classList.add('on');
-      window.__tierFilter = b.dataset.tier === '' ? null : +b.dataset.tier;
+      window.__iconFilter = d.k === 'all' ? null : { kind: d.k, val: d.val };
       renderList(); applyPinFilter();
     });
+    wrap.appendChild(b);
   });
 })();
 
@@ -158,14 +174,15 @@ function initMap(){
 }
 function renderPins(){
   if (!map || !markers) return;
-  var b = map.getBounds(), tier = window.__tierFilter, st = $('stateSel').value, q = $('q').value.trim().toLowerCase();
+  var b = map.getBounds(), st = $('stateSel').value, q = $('q').value.trim().toLowerCase();
   var drawn = 0;
   var inb = [];
   for (var i = 0; i < N && drawn < 400; i++) {
     var v = VENUES[i];
     if (v[2] < b.getSouth() || v[2] > b.getNorth() || v[3] < b.getWest() || v[3] > b.getEast()) continue;
-    var vis = (!tier || v[5] === tier) && (!st || v[1] === st) && (!q || SEARCH[i].indexOf(q) !== -1);
-    if (!vis) continue;
+    if (!st || v[1] !== st) continue;
+    if (q && SEARCH[i].indexOf(q) === -1) continue;
+    if (!matchVenue(i)) continue;
     if (!markerIdx[i]) {
       (function(idx){
         var vv = VENUES[idx];
@@ -254,6 +271,16 @@ function openVenue(idx){
     '<div class="badgehero"><span class="tier ' + t.cls + '">' + t.label + '</span>' +
     '<div class="tiersub">' + t.sub + '</div></div>' +
     (v[4] ? '<div class="notesbox"><b>COMMUNITY NOTES</b>' + esc(v[4]) + '</div>' : '') +
+    '<div class="iconrow">' +
+      (function(){ var t = TAGS[idx] || 0, h = '';
+        for (var bit in TAG_META) { if (t & +bit) h += '<span class="vic">' + TAG_META[bit].icon + '<small>' + TAG_META[bit].label + '</small></span>'; }
+        return h || '<span class="vic none"><small>No practice tags yet - add one in your review</small></span>';
+      })() +
+    '</div>' +
+    '<div class="actrow">' +
+      '<a class="btn dirbtn" href="https://www.google.com/maps/dir/?api=1&destination=' + v[2] + ',' + v[3] + '" target="_blank" rel="noopener">&#129686; Directions</a>' +
+      (WEBSITES[idx] ? '<a class="btn dirbtn web" href="' + esc(WEBSITES[idx]) + '" target="_blank" rel="noopener">&#127760; Website</a>' : '') +
+    '</div>' +
     '<div id="vmap"></div>' +
     '<div class="safety">' + SAFETY_LINE + '</div>' +
     '<div class="revsec"><h3>Leave a review (demo)</h3>' +
