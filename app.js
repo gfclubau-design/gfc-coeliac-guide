@@ -13,7 +13,18 @@ var TIERS = {
   3: { cls:'donut', label:'GF DONUTS ONLY',              sub:'GF donuts / dedicated treats only',             color:'#8A8378', pin:'#A89F92' }
 };
 var STATE_NAMES = { QLD:'QLD', NSW:'NSW', VIC:'VIC', WA:'WA', SA:'SA', ACT:'ACT', TAS:'TAS', NT:'NT', NZ:'NZ' };
-var FEATURED = [58, 367, 1102]; /* Eat Street Northshore, NAÏM, Gluten Free 4 U Toowoomba */
+/* Featured venues for the guide home, resolved by NAME (not index) so a
+   dataset rebuild can never re-point these cards at the wrong venue. */
+var FEATURED = (function () {
+  var names = ['Eat Street Northshore', 'NAÏM', 'Gluten Free 4 U - Toowoomba'];
+  var out = [];
+  names.forEach(function (n) {
+    for (var i = 0; i < VENUES.length; i++) {
+      if (VENUES[i][0].indexOf(n) === 0) { out.push(i); break; }
+    }
+  });
+  return out;
+})();
 var LS_REV = 'gfc_reviews_v1', LS_SAVED = 'gfc_saved_v1', LS_EMAIL = 'gfc_scan_email_v1';
 
 /* ---------- data prep (lowercase search strings precomputed once) ---------- */
@@ -537,7 +548,7 @@ $('saveEmail').addEventListener('click', function(){
 
 /* ---------- service worker ---------- */
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js?build=16').catch(function(){});
+  navigator.serviceWorker.register('sw.js?build=18').catch(function(){});
 }
 
 /* ---------- initial list ---------- */
