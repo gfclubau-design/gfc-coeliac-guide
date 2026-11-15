@@ -9,6 +9,7 @@ var ASSETS = [
   './manifest.json',
   './logo.png',
   './reviews-seed.json',
+  './suburbs.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-512-maskable.png',

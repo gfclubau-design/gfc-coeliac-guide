@@ -12,8 +12,10 @@ with open(os.path.join(HERE, "suburbs.csv"), newline="", encoding="utf-8") as f:
         if suburb == "ERROR":
             bad += 1
             continue
-        label = suburb or city
+        label = (suburb or city).strip()
         if label:
+            if pc:
+                label = label + ' ' + pc
             out[int(idx)] = label
             ok += 1
 json.dump(out, open(os.path.join(HERE, "suburbs.json"), "w"), ensure_ascii=False)
