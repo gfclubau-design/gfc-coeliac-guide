@@ -186,6 +186,7 @@ function initMap(){
 function renderPins(){
   if (!map || !markers) return;
   var b = map.getBounds(), st = $('stateSel').value, q = $('q').value.trim().toLowerCase();
+  markers.clearLayers();
   var drawn = 0;
   var inb = [];
   for (var i = 0; i < N && drawn < 400; i++) {
