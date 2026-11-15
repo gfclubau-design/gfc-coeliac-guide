@@ -190,3 +190,6 @@ input.comment{width:100%;border:1px solid var(--border);border-radius:12px;paddi
 .seedq .sprac{margin-top:5px;display:flex;flex-wrap:wrap;gap:5px}
 .seedq .sprac span{background:var(--mint);color:#2E4A33;font-size:9.5px;font-weight:700;border-radius:8px;padding:2px 7px}
 .snote{font-size:10px;color:#8A948B;margin-top:2px}
+
+.sharebtn{margin-left:auto;background:var(--mint);color:var(--green);border:none;border-radius:14px;padding:8px 14px;font-size:12px;font-weight:700;white-space:nowrap}
+.sharebtn:active{background:var(--gold)}

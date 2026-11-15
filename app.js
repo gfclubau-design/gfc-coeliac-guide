@@ -281,6 +281,15 @@ function requestGeo(){
   }, { timeout: 10000 });
 }
 
+/* ---------- share the app ---------- */
+var SHARE = { title: 'GFC Coeliac Guide', text: 'Gluten-free places near you, verified by real club members', url: 'https://gfclubau-design.github.io/gfc-coeliac-guide/' };
+if ($('shareBtn')) $('shareBtn').addEventListener('click', function(){
+  if (navigator.share) { navigator.share(SHARE).catch(function(){}); return; }
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(SHARE.url).then(function(){ $('shareBtn').textContent = 'LINK COPIED'; setTimeout(function(){ $('shareBtn').textContent = 'SHARE'; }, 1800); }, function(){});
+  }
+});
+
 /* ---------- venue page ---------- */
 var curVenue = null, curStars = 0, curChecks = {}, curMenuFile = '', curFoodFile = '';
 function openVenue(idx){
@@ -508,7 +517,7 @@ $('saveEmail').addEventListener('click', function(){
 
 /* ---------- service worker ---------- */
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js?build=13').catch(function(){});
+  navigator.serviceWorker.register('sw.js?build=14').catch(function(){});
 }
 
 /* ---------- initial list ---------- */
