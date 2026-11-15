@@ -54,8 +54,7 @@ function matchVenue(i){
   var f = window.__iconFilter;
   if (!f || f.kind === 'all') return true;
   if (f.kind === 'tier') {
-    var tMap = {0:'has', 1:'acc', 2:'full', 3:'donut'};
-    return VENUES[i][5] === tMap[f.val];
+    return VENUES[i][5] === f.val;
   }
   return ((TAGS[i] || 0) & f.val) !== 0;
 }
