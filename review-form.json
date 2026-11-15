@@ -1,0 +1,134 @@
+{
+ "formId": "1xmSZm-EB504krHYAu56URMnRYY91dS81WTddnbSmtjA",
+ "info": {
+  "title": "Review a venue on the GFC Coeliac Guide",
+  "documentTitle": "GFC Coeliac Guide - Venue Review Form"
+ },
+ "settings": {
+  "emailCollectionType": "DO_NOT_COLLECT"
+ },
+ "revisionId": "00000005",
+ "responderUri": "https://docs.google.com/forms/d/e/1FAIpQLScWlEvB8h3NZWcua5FvgaJ-vg34cZy8GdhIREa4SSzZjHrVAQ/viewform",
+ "items": [
+  {
+   "itemId": "054b15c4",
+   "title": "Venue name",
+   "questionItem": {
+    "question": {
+     "questionId": "027d2d9a",
+     "required": true,
+     "textQuestion": {}
+    }
+   }
+  },
+  {
+   "itemId": "57f48ca2",
+   "title": "Star rating",
+   "description": "1 = not safe, 5 = perfect for gluten-free",
+   "questionItem": {
+    "question": {
+     "questionId": "16a0c405",
+     "required": true,
+     "scaleQuestion": {
+      "low": 1,
+      "high": 5,
+      "lowLabel": "Not safe",
+      "highLabel": "Perfect"
+     }
+    }
+   }
+  },
+  {
+   "itemId": "39dd433c",
+   "title": "What felt good for gluten-free? (tick all that apply)",
+   "questionItem": {
+    "question": {
+     "questionId": "5a04f3e0",
+     "choiceQuestion": {
+      "type": "CHECKBOX",
+      "options": [
+       {
+        "value": "Dedicated fryer"
+       },
+       {
+        "value": "GF menu clearly labelled"
+       },
+       {
+        "value": "Staff understood coeliac disease"
+       },
+       {
+        "value": "Plenty of GF choice"
+       },
+       {
+        "value": "Felt like a normal menu"
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "itemId": "59bb4f12",
+   "title": "Your one-line review",
+   "description": "How did it feel to eat here? It may be shown on the venue's page - keep it friendly.",
+   "questionItem": {
+    "question": {
+     "questionId": "123407b7",
+     "required": true,
+     "textQuestion": {
+      "paragraph": true
+     }
+    }
+   }
+  },
+  {
+   "itemId": "35527cf8",
+   "title": "Your name or initials (as you'd like it shown)",
+   "questionItem": {
+    "question": {
+     "questionId": "72af6e43",
+     "textQuestion": {}
+    }
+   }
+  },
+  {
+   "itemId": "08a2bc6b",
+   "title": "Suburb",
+   "questionItem": {
+    "question": {
+     "questionId": "3da180c4",
+     "textQuestion": {}
+    }
+   }
+  },
+  {
+   "itemId": "1d5e80f7",
+   "title": "Are you a Gluten Free Club member?",
+   "questionItem": {
+    "question": {
+     "questionId": "5f20c776",
+     "choiceQuestion": {
+      "type": "RADIO",
+      "options": [
+       {
+        "value": "Yes"
+       },
+       {
+        "value": "Not yet"
+       },
+       {
+        "value": "I'd like to join"
+       }
+      ]
+     }
+    }
+   }
+  }
+ ],
+ "publishSettings": {
+  "publishState": {
+   "isPublished": true,
+   "isAcceptingResponses": true
+  }
+ }
+}

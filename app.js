@@ -3,6 +3,7 @@
 
 var SAFETY_LINE = 'Always confirm with staff - menus and practices change.';
 var FORM_URL = 'https://forms.gle/b7gmN3HLygfZ3maq5';
+var REVIEW_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScWlEvB8h3NZWcua5FvgaJ-vg34cZy8GdhIREa4SSzZjHrVAQ/viewform';
 
 /* tier codes in venues.js: 0=has GF options, 1=accredited, 2=100% GF, 3=GF donuts only */
 var TIERS = {
@@ -322,8 +323,9 @@ function openVenue(idx){
     '<label class="phototile" id="tileFood">&#127860; Food snap<br><small>tap to attach</small><input type="file" accept="image/*" hidden id="fileFood"></label>' +
     '</div>' +
     '<input class="comment" id="revComment" maxlength="200" placeholder="One line - how did it feel to eat here?">' +
-    '<button class="btn" id="revSave">Save review</button>' +
-    '<div style="font-size:10.5px;color:#8A948B;margin-top:6px">Demo build - your review stays on this device only.</div>' +
+    '<button class="btn" id="revSave">Save to my device</button>' +
+    '<button class="btn dirbtn" id="revPost" style="margin-left:6px">&#128075; Post it to the community</button>' +
+    '<div style="font-size:10.5px;color:#8A948B;margin-top:6px">Save keeps it on this device. Post sends it to Gluten Free Club - after a quick check, it shows for everyone.</div>' +
     '<div id="revList"></div>' +
     '</div>' +
     '<div class="stack"><a class="btn ghost center" target="_blank" rel="noopener" href="' + FORM_URL + '">Claim this venue &#8250;</a></div>' +
@@ -349,6 +351,13 @@ function openVenue(idx){
   }
   /* photo placeholders - delegated so tile re-renders keep working */
   $('revSave').addEventListener('click', function(){ saveReview(idx); });
+  $('revPost').addEventListener('click', function(){
+    var v = VENUES[idx];
+    var url = REVIEW_FORM_URL + '?usp=pp_url' +
+      '&entry.41758106=' + encodeURIComponent(v[0]) +
+      '&entry.1033994436=' + encodeURIComponent(v[1]);
+    window.open(url, '_blank', 'noopener');
+  });
   renderRevs(idx);
   /* mini map */
   setTimeout(function(){
@@ -500,7 +509,7 @@ $('saveEmail').addEventListener('click', function(){
 
 /* ---------- service worker ---------- */
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js?build=11').catch(function(){});
+  navigator.serviceWorker.register('sw.js?build=12').catch(function(){});
 }
 
 /* ---------- initial list ---------- */
