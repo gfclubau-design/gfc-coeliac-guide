@@ -62,6 +62,15 @@ var TAG_META = {
   8:  { icon: '&#127849;', label: 'GF donuts' },
   16: { icon: '&#127838;', label: 'GF bread available' }
 };
+/* ---------- bread tag derivation (bit 16) - MUST run before the chip bar
+   builds, or the Bread chip counts zero venues and hides itself ---------- */
+(function(){
+  for (var i = 0; i < N; i++) {
+    var t = (VENUES[i][0] + ' ' + (VENUES[i][4] || '')).toLowerCase();
+    if (t.indexOf('bread') !== -1 || t.indexOf('bakery') !== -1 || t.indexOf('bakehouse') !== -1) TAGS[i] = (TAGS[i] || 0) | 16;
+  }
+})();
+
 /* WikiCamps-style three-state matching: chip states are 'must' (venue must
    have it), 'hide' (exclude venues that have it) or null (don't care).
    Must-tiers combine as OR (show any of them); must-tags combine as AND. */
@@ -358,14 +367,6 @@ function requestGeo(){
   }, { timeout: 10000 });
 }
 
-/* ---------- bread tag derivation (bit 16) ---------- */
-(function(){
-  for (var i = 0; i < N; i++) {
-    var t = (VENUES[i][0] + ' ' + (VENUES[i][4] || '')).toLowerCase();
-    if (t.indexOf('bread') !== -1 || t.indexOf('bakery') !== -1 || t.indexOf('bakehouse') !== -1) TAGS[i] = (TAGS[i] || 0) | 16;
-  }
-})();
-
 /* ---------- suburb enrichment (search by suburb) ---------- */
 var SUBURBS = {};
 fetch('./suburbs.json').then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
@@ -614,7 +615,7 @@ $('saveEmail').addEventListener('click', function(){
 
 /* ---------- service worker ---------- */
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js?build=20').catch(function(){});
+  navigator.serviceWorker.register('sw.js?build=21').catch(function(){});
 }
 
 /* ---------- initial list ---------- */
