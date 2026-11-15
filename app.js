@@ -354,8 +354,7 @@ function openVenue(idx){
   $('revPost').addEventListener('click', function(){
     var v = VENUES[idx];
     var url = REVIEW_FORM_URL + '?usp=pp_url' +
-      '&entry.41758106=' + encodeURIComponent(v[0]) +
-      '&entry.1033994436=' + encodeURIComponent(v[1]);
+      '&entry.41758106=' + encodeURIComponent(v[0]);
     window.open(url, '_blank', 'noopener');
   });
   renderRevs(idx);
@@ -509,7 +508,7 @@ $('saveEmail').addEventListener('click', function(){
 
 /* ---------- service worker ---------- */
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js?build=12').catch(function(){});
+  navigator.serviceWorker.register('sw.js?build=13').catch(function(){});
 }
 
 /* ---------- initial list ---------- */
