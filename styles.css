@@ -156,3 +156,5 @@ input.comment{width:100%;border:1px solid var(--border);border-radius:12px;paddi
 
 /* map attribution + leaflet tweaks */
 .leaflet-container{font-family:inherit}
+
+.maptoggle{display:block;width:100%;margin:10px 0 4px;padding:11px;background:#fff;border:1.5px solid var(--gold);color:#7A5A1E;font-weight:700;font-size:13.5px;border-radius:14px;cursor:pointer}

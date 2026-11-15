@@ -56,7 +56,7 @@ function showTab(id){
   var btn = document.querySelector('.nav button[data-tab="' + id + '"]');
   if (btn) btn.classList.add('on');
   window.scrollTo(0,0);
-  if (id === 'page-nearme') initMap();
+  if (id === 'page-nearme') { initMap(); autoLocate(); }
   if (id === 'page-club') renderSaved();
   if (id === 'page-scan') { var e = load(LS_EMAIL,''); if (e) { $('scanEmail').value = e; $('emailSaved').style.display='block'; } }
 }
@@ -152,20 +152,33 @@ function initMap(){
   map = L.map('map', { preferCanvas: true }).setView([-27.47, 153.03], 9);
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(map);
   markers = L.layerGroup().addTo(map);
-  var canvasRenderer = L.canvas({ padding: 0.3 });
-  for (var i = 0; i < N; i++) {
-    (function(idx){
-      var v = VENUES[idx];
-      var m = L.circleMarker([v[2], v[3]], {
-        renderer: canvasRenderer, radius: 5, weight: 1.5,
-        color: '#fff', fillColor: TIERS[v[5]].pin, fillOpacity: 0.95
-      });
-      m.on('click', function(){ showMapCard(idx); });
-      m.addTo(markers);
-      markerIdx[idx] = m;
-    })(i);
-  }
+  map.on('moveend zoomend', renderPins);
+  renderPins();
   renderList();
+}
+function renderPins(){
+  if (!map || !markers) return;
+  var b = map.getBounds(), tier = window.__tierFilter, st = $('stateSel').value, q = $('q').value.trim().toLowerCase();
+  var drawn = 0;
+  var inb = [];
+  for (var i = 0; i < N && drawn < 400; i++) {
+    var v = VENUES[i];
+    if (v[2] < b.getSouth() || v[2] > b.getNorth() || v[3] < b.getWest() || v[3] > b.getEast()) continue;
+    var vis = (!tier || v[5] === tier) && (!st || v[1] === st) && (!q || SEARCH[i].indexOf(q) !== -1);
+    if (!vis) continue;
+    if (!markerIdx[i]) {
+      (function(idx){
+        var vv = VENUES[idx];
+        var m = L.circleMarker([vv[2], vv[3]], {
+          radius: 8, weight: 2, color: '#fff', fillColor: TIERS[vv[5]].pin, fillOpacity: 0.95
+        });
+        m.on('click', function(){ showMapCard(idx); });
+        markerIdx[idx] = m;
+      })(i);
+    }
+    if (!map.hasLayer(markerIdx[i])) markerIdx[i].addTo(markers);
+    drawn++;
+  }
 }
 function showMapCard(idx){
   var v = VENUES[idx], t = TIERS[v[5]], card = $('mapcard');
@@ -176,22 +189,34 @@ function showMapCard(idx){
 }
 function applyPinFilter(){
   if (!markers) return;
-  var tier = window.__tierFilter, st = $('stateSel').value, q = $('q').value.trim().toLowerCase();
-  for (var i = 0; i < N; i++) {
-    var m = markerIdx[i]; if (!m) continue;
-    var v = VENUES[i];
-    var vis = (!tier || v[5] === tier) && (!st || v[1] === st) && (!q || SEARCH[i].indexOf(q) !== -1);
-    if (vis) { if (!map.hasLayer(m)) m.addTo(markers); }
-    else if (map.hasLayer(m)) markers.removeLayer(m);
-  }
+  renderPins();
 }
 $('q').addEventListener('change', applyPinFilter);
 $('stateSel').addEventListener('change', applyPinFilter);
 document.getElementById('q').addEventListener('input', debounce(applyPinFilter, 300));
 function debounce(fn, ms){ var t; return function(){ clearTimeout(t); t = setTimeout(fn, ms); }; }
 
+/* ---------- map toggle ---------- */
+$('mapToggle').addEventListener('click', function(){
+  var w = document.getElementById('mapwrap');
+  var showing = !w.hidden;
+  w.hidden = showing;
+  this.innerHTML = showing ? '&#128506;&#65039; Show map' : '&#128196; Hide map';
+  if (!showing) { initMap(); setTimeout(function(){ map.invalidateSize(); renderPins(); }, 80); }
+  else { window.scrollTo(0, document.getElementById('listmeta').offsetTop - 60); }
+});
+
 /* ---------- geolocation ---------- */
+window.__autoLocated = false;
+function autoLocate(){
+  if (window.__autoLocated || window.__geo || !navigator.geolocation) return;
+  window.__autoLocated = true;
+  requestGeo();
+}
 $('geoBtn').addEventListener('click', function(){
+  requestGeo();
+});
+function requestGeo(){
   var msg = $('locmsg');
   msg.style.display = 'block';
   if (!navigator.geolocation) { msg.textContent = 'Sorry - this browser does not support location.'; return; }
@@ -212,7 +237,7 @@ $('geoBtn').addEventListener('click', function(){
       ? 'Location denied - no worries. Search by name or state instead.'
       : 'Could not get your location - search by name or state instead.';
   }, { timeout: 10000 });
-});
+}
 
 /* ---------- venue page ---------- */
 var curVenue = null, curStars = 0, curChecks = {}, curMenuFile = '', curFoodFile = '';
