@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GFC Coeliac Guide</title>
+<meta name="description" content="Find gluten-free venues across Australia, read community reviews and scan labels. Always confirm with staff - menus and practices change.">
+<meta name="theme-color" content="#FBF6EF">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="GFC Guide">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ TAB 1: GUIDE ============ -->
+  <section class="screen on" id="page-guide">
+    <div class="logo-row">
+      <div class="badge">
+        <div class="h1">&#10084;&#65039;</div><div class="h2">&#10084;&#65039;</div>
+        <div class="l1">Gluten Free</div><div class="l2">Club</div>
+        <div class="burst">&#10022;&#10022;&#10022;</div>
+      </div>
+      <div class="who">
+        <div class="eyebrow">Gluten Free Club</div>
+        <div class="title">Coeliac Guide</div>
+        <div class="sub">Find places. Read reviews. Scan labels.</div>
+      </div>
+    </div>
+
+    <div class="chip">
+      <div class="ic">&#127981;</div>
+      <div><b>Gluten Free Club - Brisbane (your local club)</b><span>Your local club &amp; guide area</span></div>
+    </div>
+
+    <div class="grid">
+      <button class="card pink" id="go-find">
+        <div class="tile">&#128269;</div>
+        <div class="txt"><b>Find a Venue</b><small>Cafes, bakeries &amp; restaurants near you, rated by real coeliacs</small></div>
+        <div class="watermark">&#129361;</div><div class="chev">&#8250;</div>
+      </button>
+      <button class="card mint" id="go-review">
+        <div class="tile">&#128248;</div>
+        <div class="txt"><b>Review a Place</b><small>Snap the menu &amp; your meal - help the next coeliac eat safely</small></div>
+        <div class="watermark">&#127807;</div><div class="chev">&#8250;</div>
+      </button>
+      <button class="card peach" id="go-scan">
+        <div class="tile">&#128247;</div>
+        <div class="txt"><b>Scan a Label</b><small>Photo of any label - see exactly which line to watch</small></div>
+        <div class="watermark">&#129382;</div><div class="chev">&#8250;</div>
+        <div class="soonpill">Coming soon</div>
+      </button>
+    </div>
+
+    <div class="stats">
+      <b id="statcount">4,782 venues</b> Australia-wide
+      <p>- seeded from the community-built gluten-free map -</p>
+    </div>
+
+    <h2 class="sect">Featured around South East Queensland</h2>
+    <div id="featured"></div>
+
+    <div class="safety">Always confirm with staff - menus and practices change.</div>
+    <div class="credit">Venue data seeded from the community-built gluten-free map with thanks to its contributors.</div>
+  </section>
+
+  <!-- ============ TAB 2: NEAR ME ============ -->
+  <section class="screen" id="page-nearme">
+    <div class="logo-row">
+      <div class="badge small"><div class="l1">GF</div><div class="l2">Club</div></div>
+      <div class="who">
+        <div class="eyebrow">Near me</div>
+        <div class="title">Find a venue</div>
+      </div>
+    </div>
+    <div class="searchbar">
+      <input id="q" type="search" placeholder="Search venue name or notes..." autocomplete="off">
+      <button class="geo-btn" id="geoBtn">&#128205; Near me</button>
+    </div>
+    <div class="locmsg" id="locmsg"></div>
+    <div class="filters" id="tierChips"></div>
+    <div class="filters">
+      <select id="stateSel"><option value="">All states</option></select>
+    </div>
+    <div id="mapwrap">
+      <div id="map"></div>
+      <div class="mapcard" id="mapcard"></div>
+    </div>
+    <div class="listmeta" id="listmeta"></div>
+    <div id="venuelist"></div>
+    <div class="credit">Venue data seeded from the community-built gluten-free map with thanks to its contributors.</div>
+  </section>
+
+  <!-- ============ TAB 3: VENUE PAGE ============ -->
+  <section id="page-venue"></section>
+
+  <!-- ============ TAB 4: SCAN ============ -->
+  <section class="screen" id="page-scan">
+    <div class="center">
+      <div class="bigicon">&#128247;</div>
+      <h2 style="margin:0 0 6px">Scan a Label</h2>
+      <p style="font-size:13px;color:var(--muted);margin:0 8px 4px;line-height:1.5">
+        Photograph any label - see the exact ingredient line to watch. Launching soon.</p>
+    </div>
+    <div class="notecard">
+      <b>Get told when it launches</b>
+      <div class="emailrow">
+        <input id="scanEmail" type="email" placeholder="you@email.com" autocomplete="email">
+        <button class="btn" id="saveEmail">Notify me</button>
+      </div>
+      <div id="emailSaved" style="display:none;font-size:12px;color:var(--green);margin-top:8px">&#9989; Saved on this device - we'll show it here when scan goes live.</div>
+    </div>
+    <div class="safety">Never rely on an app for safety - always read the physical label and confirm with the maker.</div>
+    <div class="safety">Always confirm with staff - menus and practices change.</div>
+  </section>
+
+  <!-- ============ TAB 5: CLUB ============ -->
+  <section class="screen" id="page-club">
+    <div class="logo-row">
+      <div class="badge small"><div class="l1">GF</div><div class="l2">Club</div></div>
+      <div class="who">
+        <div class="eyebrow">Gluten Free Club</div>
+        <div class="title">Join the club</div>
+      </div>
+    </div>
+    <div class="pitch">
+      <b>The app is free for Gluten Free Club members</b>
+      <p>Members get the local guide first, club meet-ups, supplier deals and a community that actually gets coeliac life. Built in Brisbane, for Brisbane (and everywhere the map reaches).</p>
+      <a class="btn" target="_blank" rel="noopener" href="https://www.facebook.com/groups/625162559593528">Join the Gluten Free Club Facebook group &#8250;</a>
+    </div>
+    <div class="stack">
+      <a class="btn gold center" target="_blank" rel="noopener" href="https://forms.gle/b7gmN3HLygfZ3maq5">Own a venue? Get listed free &#8250;</a>
+    </div>
+
+    <h2 class="sect">&#10084;&#65039; Saved venues</h2>
+    <div id="savedList"></div>
+
+    <div class="credit">Venue data seeded from the community-built gluten-free map with thanks to its contributors.</div>
+  </section>
+
+  <!-- ============ BOTTOM NAV ============ -->
+  <nav class="nav">
+    <button data-tab="page-guide" class="on"><span>&#127968;</span>Guide</button>
+    <button data-tab="page-nearme"><span>&#128269;</span>Near me</button>
+    <button data-tab="page-scan"><span>&#128247;</span>Scan</button>
+    <button data-tab="page-club"><span>&#128101;</span>Club</button>
+    <button id="youBtn"><span>&#128038;</span>You</button>
+  </nav>
+
+  <!-- ============ YOU SHEET ============ -->
+  <div id="you-sheet">
+    <div class="sheet">
+      <div class="grab"></div>
+      <div class="logo-row" style="padding-bottom:6px">
+        <div class="badge small"><div class="l1">GF</div><div class="l2">Club</div></div>
+        <div class="who"><div class="eyebrow">You</div><div class="title">Your stuff</div></div>
+        <button class="backbtn" id="youClose">&#10005;</button>
+      </div>
+      <h2 class="sect">&#128293; Saved venues</h2>
+      <div id="youSaved"></div>
+      <h2 class="sect">&#128221; Your demo reviews</h2>
+      <div id="youReviews"></div>
+      <p style="font-size:11px;color:#8A948B">Reviews and saves are stored on this device only (demo staging build).</p>
+    </div>
+  </div>
+
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="venues.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
