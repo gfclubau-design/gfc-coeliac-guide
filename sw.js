@@ -1,5 +1,5 @@
 /* GFC Coeliac Guide - offline shell cache (staging demo) */
-var CACHE = 'gfc-shell-v2';
+var CACHE = 'gfc-shell-v3';
 var ASSETS = [
   './',
   './index.html',
@@ -7,6 +7,7 @@ var ASSETS = [
   './app.js',
   './venues.js',
   './manifest.json',
+  './logo.png',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-512-maskable.png',
