@@ -138,7 +138,14 @@ function renderList(){
   });
 }
 $('q').addEventListener('input', renderList);
-$('stateSel').addEventListener('change', renderList);
+$('stateSel').addEventListener('change', function(){
+  renderList();
+  var STC = {QLD:[-23.2,146.5], NSW:[-32.5,148.5], VIC:[-37.2,144.5], SA:[-30.5,136.5], WA:[-27.5,121.5], TAS:[-42.1,146.8], NT:[-19.5,133.5], ACT:[-35.28,149.13]};
+  var stv = $('stateSel').value;
+  if (map && stv && STC[stv]) { map.setView(STC[stv], 8); if (window.__geo === undefined || !window.__geo) {} }
+  else if (map && !stv) { map.setView([-27.47, 153.03], 9); }
+  renderPins();
+});
 (function(){
   var opts = Object.keys(STATE_NAMES).sort();
   var sel = $('stateSel');
