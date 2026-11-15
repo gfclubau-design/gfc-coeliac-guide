@@ -174,7 +174,7 @@ function initMap(){
   if (map) { setTimeout(function(){ map.invalidateSize(); }, 50); return; }
   if (typeof L === 'undefined') { $('map').innerHTML = '<div style="padding:40px;text-align:center;color:#6B7A6E">Map failed to load - check your connection.</div>'; return; }
   map = L.map('map', { preferCanvas: true }).setView([-27.47, 153.03], 9);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19, subdomains: 'abcd', attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>' }).addTo(map);
+  L.tileLayer('https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> style &copy; <a href="https://www.hotosm.org/">Humanitarian OSM Team</a>' }).addTo(map);
   markers = L.layerGroup().addTo(map);
   map.on('moveend zoomend', renderPins);
   renderPins();
@@ -339,7 +339,7 @@ function openVenue(idx){
   setTimeout(function(){
     if (typeof L === 'undefined' || !$('vmap')) return;
     var vm = L.map('vmap', { scrollWheelZoom: false, dragging: true });
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap contributors' }).addTo(vm);
+    L.tileLayer('https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap contributors' }).addTo(vm);
     L.circleMarker([v[2], v[3]], { radius: 8, color: '#fff', weight: 2, fillColor: t.pin, fillOpacity: 1 }).addTo(vm).bindPopup(esc(v[0]));
     vm.setView([v[2], v[3]], 14);
     window.__vmap = vm;
