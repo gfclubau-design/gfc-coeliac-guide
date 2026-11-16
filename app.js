@@ -429,6 +429,9 @@ function openVenue(idx){
     '</div>' +
     '<div class="actrow">' +
       '<a class="btn dirbtn" href="https://www.google.com/maps/dir/?api=1&destination=' + v[2] + ',' + v[3] + '" target="_blank" rel="noopener">&#129686; Directions</a>' +
+      /* Tee rule: never scrape or store Google reviews - link out to the
+         venue's own Google listing (fresh reviews, $0, Google-terms-safe) */
+      '<a class="btn ghost" href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(v[0] + ' ' + (SUBURBS[String(idx)] || v[1])) + '" target="_blank" rel="noopener">&#11088; Google reviews</a>' +
       (WEBSITES[idx] ? '<a class="btn dirbtn web" href="' + esc(WEBSITES[idx]) + '" target="_blank" rel="noopener">&#127760; Website</a>' : '') +
     '</div>' +
     ((v[2] !== 0 || v[3] !== 0) ? '<div id="vmap"></div>' : '') +
@@ -632,7 +635,7 @@ $('saveEmail').addEventListener('click', function(){
 
 /* ---------- service worker ---------- */
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js?build=23').catch(function(){});
+  navigator.serviceWorker.register('sw.js?build=24').catch(function(){});
 }
 
 /* ---------- initial list ---------- */
