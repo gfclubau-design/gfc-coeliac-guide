@@ -328,7 +328,10 @@ function renderPins(){
 function showMapCard(idx){
   var v = VENUES[idx], t = TIERS[v[5]], card = $('mapcard');
   card.innerHTML = '<b>' + esc(v[0]) + '</b><div class="meta">' + esc(v[1]) + ' &middot; <span class="tier ' + t.cls + '">' + t.label + '</span></div>' +
-    '<button class="btn small" id="mcOpen">View venue &#8250;</button>';
+    '<div class="actrow">' +
+    /* Tee rule (16 Nov): pin tap = one-tap Navigate straight from the map card */
+    '<a class="btn small dirbtn" href="https://www.google.com/maps/dir/?api=1&destination=' + v[2] + ',' + v[3] + '" target="_blank" rel="noopener">&#129686; Navigate</a>' +
+    '<button class="btn small" id="mcOpen">View venue &#8250;</button></div>';
   card.style.display = 'block';
   $('mcOpen').onclick = function(){ openVenue(idx); };
 }
@@ -635,7 +638,7 @@ $('saveEmail').addEventListener('click', function(){
 
 /* ---------- service worker ---------- */
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js?build=25').catch(function(){});
+  navigator.serviceWorker.register('sw.js?build=26').catch(function(){});
 }
 
 /* ---------- initial list ---------- */
