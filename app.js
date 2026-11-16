@@ -349,6 +349,8 @@ function renderPins(){
 function showMapCard(idx){
   var v = VENUES[idx], t = TIERS[v[5]], card = $('mapcard');
   card.innerHTML = '<b>' + esc(v[0]) + '</b><div class="meta">' + esc(v[1]) + ' &middot; <span class="tier ' + t.cls + '">' + t.label + '</span></div>' +
+    /* Tee rule (16 Nov): closure status visible BEFORE anyone navigates */
+    (v[4] && v[4].indexOf('[Google:') !== -1 ? '<div class="closedchip">&#9888;&#65039; Temporarily closed (Google)</div>' : '') +
     '<div class="actrow">' +
     /* Tee rule (16 Nov): pin tap = one-tap Navigate straight from the map card */
     '<a class="btn small dirbtn" href="https://www.google.com/maps/dir/?api=1&destination=' + v[2] + ',' + v[3] + '" target="_blank" rel="noopener">&#129686; Navigate</a>' +
@@ -444,6 +446,8 @@ function openVenue(idx){
     '<div style="padding:0 16px">' +
     '<div class="badgehero"><span class="tier ' + t.cls + '">' + t.label + '</span>' +
     '<div class="tiersub">' + t.sub + '</div></div>' +
+    /* Tee rule (16 Nov): closure status visible before the Directions tap */
+    (v[4] && v[4].indexOf('[Google:') !== -1 ? '<div class="closedchip">&#9888;&#65039; Temporarily closed (Google) - check before you drive</div>' : '') +
     (v[4] ? '<div class="notesbox"><b>COMMUNITY NOTES</b>' + esc(v[4]) + '</div>' : '') +
     '<div class="iconrow">' +
       (function(){ var t = TAGS[idx] || 0, h = '';
@@ -659,7 +663,7 @@ $('saveEmail').addEventListener('click', function(){
 
 /* ---------- service worker ---------- */
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js?build=29').catch(function(){});
+  navigator.serviceWorker.register('sw.js?build=30').catch(function(){});
 }
 
 /* ---------- initial list ---------- */
