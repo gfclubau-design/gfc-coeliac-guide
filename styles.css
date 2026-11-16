@@ -88,7 +88,7 @@ button{font-family:inherit}
 .fchip.on{background:var(--green);border-color:var(--green);color:#fff}
 .fchip .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:1px}
 select#stateSel{border:1.5px solid var(--border);background:#fff;border-radius:999px;font-size:12px;padding:7px 10px;color:var(--deep);max-width:110px}
-#map{height:353px;border-radius:18px;border:1px solid var(--border);z-index:1;background:#E8EFE8}
+#map{height:346px;border-radius:18px;border:1px solid var(--border);z-index:1;background:#E8EFE8}
 #map .gfc-dot{border-radius:50%;border:2px solid #fff;box-shadow:0 0 2px rgba(0,0,0,.4)}
 .mapcard{position:absolute;left:10px;right:10px;bottom:10px;background:#fff;border-radius:14px;box-shadow:0 4px 18px rgba(0,0,0,.18);padding:10px 14px;display:none;z-index:500}
 #mapwrap{position:relative}
