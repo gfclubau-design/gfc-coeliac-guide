@@ -140,6 +140,31 @@ $('go-scan').addEventListener('click', function(){ showTab('page-scan'); });
 
 /* ---------- venue list rendering ---------- */
 var curList = [];
+/* ---- paid placement (Tee spec 16 Nov; register UPDATE 15) ----
+   PAID_TOP   = the ONE global paid venue: front of EVERY list, search position 1.
+   PAID_LOCAL = paid pool; the 2 nearest the user's location rotate in, so a
+   traveller always sees a paid venue. DEMO venues for staging only - swap in
+   real paid venues once the backend takes payments. */
+var PAID_TOP = 2059;                 /* Sushi Hub Queen Street Mall (demo) */
+var PAID_LOCAL = [1389, 1905, 1426, 1311];  /* Chermside, Ipswich, Gold Coast, Toowoomba (demo) */
+function paidRef(){
+  var g = window.__geo;
+  if (g) return g;
+  var CAPS = {QLD:[-27.47,153.03], NSW:[-33.87,151.21], VIC:[-37.81,144.96],
+              SA:[-34.93,138.60], WA:[-31.95,115.86], TAS:[-42.88,147.33],
+              NT:[-12.46,130.84], ACT:[-35.28,149.13]};
+  var s = CAPS[$('stateSel').value] || CAPS.QLD;
+  return { lat: s[0], lng: s[1] };
+}
+function paidLocal(){
+  var r = paidRef();
+  return PAID_LOCAL.slice().sort(function(a,b){
+    var da = (VENUES[a][2]===0 && VENUES[a][3]===0) ? 1e12 : haversine(r.lat, r.lng, VENUES[a][2], VENUES[a][3]);
+    var db = (VENUES[b][2]===0 && VENUES[b][3]===0) ? 1e12 : haversine(r.lat, r.lng, VENUES[b][2], VENUES[b][3]);
+    return da - db;
+  }).slice(0, 2);
+}
+
 function renderList(){
   var q = $('q').value.trim().toLowerCase();
   var st = $('stateSel').value;
@@ -176,15 +201,24 @@ function renderList(){
     renderList.__lastFit = '';
   }
 
+  /* paid placement: PAID_TOP always position 1; the 2 nearest local paid
+     venues lead the rest (they must match the search); free listings follow */
+  var lp = paidLocal();
+  var paidFirst = [PAID_TOP].concat(lp.filter(function(i){
+    return i !== PAID_TOP && (!q || idxs.indexOf(i) !== -1);
+  }));
+  var rest = idxs.filter(function(i){ return paidFirst.indexOf(i) === -1; });
+  idxs = paidFirst.concat(rest);
   var total = idxs.length, show = idxs.slice(0, 300);
   curList = show;
   $('listmeta').textContent = 'Showing ' + show.length + ' of ' + fmt(total) + ' matching venues' + (total > show.length ? ' (refine your search to see more)' : '');
   var html = '';
   for (var k = 0; k < show.length; k++) {
     var i2 = show[k], v = VENUES[i2], t = TIERS[v[5]];
-    html += '<div class="list-item" data-idx="' + i2 + '"><div class="ti">' +
+    var isPaid = paidFirst.indexOf(i2) !== -1;
+    html += '<div class="list-item' + (isPaid ? ' paid-item' : '') + '" data-idx="' + i2 + '"><div class="ti">' +
       (v[5]===2 ? '&#127942;' : v[5]===1 ? '&#9989;' : v[5]===3 ? '&#127849;' : '&#127860;') + '</div>' +
-      '<div class="lt"><b>' + esc(v[0]) + '</b><small>' + esc(v[1]) + (geo ? ' &middot; ' + distLabel(geoDist(i2)) : '') +
+      '<div class="lt"><b>' + esc(v[0]) + '</b>' + (isPaid ? '<span class="paidtag">PAID</span>' : '') + '<small>' + esc(v[1]) + (geo ? ' &middot; ' + distLabel(geoDist(i2)) : '') +
       (v[4] ? ' &middot; ' + esc(v[4].slice(0,52)) : '') + '</small></div>' +
       '<span class="tier ' + t.cls + '">' + t.label + '</span></div>';
   }
@@ -351,10 +385,9 @@ function showMapCard(idx){
   card.innerHTML = '<button class="cardx" id="mcX" title="Close">&times;</button><b>' + esc(v[0]) + '</b><div class="meta">' + esc(v[1]) + ' &middot; <span class="tier ' + t.cls + '">' + t.label + '</span></div>' +
     /* Tee rule (16 Nov): closure status visible BEFORE anyone navigates */
     (v[4] && v[4].indexOf('[Google:') !== -1 ? '<div class="closedchip">&#9888;&#65039; Temporarily closed (Google)</div>' : '') +
-    '<div class="actrow">' +
-    /* Tee rule (16 Nov): pin tap = one-tap Navigate straight from the map card */
-    '<a class="btn small dirbtn" href="https://www.google.com/maps/dir/?api=1&destination=' + v[2] + ',' + v[3] + '" target="_blank" rel="noopener">&#129686; Navigate</a>' +
-    '<button class="btn small" id="mcOpen">View venue &#8250;</button></div>';
+    /* Tee rule (16 Nov, revised): no Navigate in the map window - members tap
+       View venue first, so closure status and reviews are seen before driving */
+    '<button class="btn small" id="mcOpen">View venue &#8250;</button>';
   card.style.display = 'block';
   $('mcOpen').onclick = function(){ openVenue(idx); };
   $('mcX').onclick = function(){ card.style.display = 'none'; };
@@ -664,7 +697,7 @@ $('saveEmail').addEventListener('click', function(){
 
 /* ---------- service worker ---------- */
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js?build=32').catch(function(){});
+  navigator.serviceWorker.register('sw.js?build=33').catch(function(){});
 }
 
 /* ---------- initial list ---------- */

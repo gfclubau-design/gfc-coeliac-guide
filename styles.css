@@ -94,6 +94,9 @@ select#stateSel{border:1.5px solid var(--border);background:#fff;border-radius:9
 #mapwrap{position:relative}
 .closedchip{background:#FBE3E6;color:#8E2A3A;font-size:11px;font-weight:700;border-radius:8px;padding:4px 8px;margin:6px 0}
 .cardx{position:absolute;top:4px;right:8px;background:none;border:none;font-size:20px;line-height:1;color:var(--muted);cursor:pointer;padding:4px 6px;z-index:2}
+/* paid placement (UPDATE 15 demo) */
+.paid-item{background:#FFF9E8;border:1px solid #E8D48B}
+.paidtag{display:inline-block;margin-left:6px;background:#B8860B;color:#fff;font-size:9px;font-weight:700;letter-spacing:.5px;padding:1px 6px;border-radius:999px;vertical-align:2px}
 .mapcard b{font-size:13.5px;display:block}
 .mapcard .meta{font-size:11px;color:var(--muted);margin:2px 0 8px}
 .listmeta{font-size:11.5px;color:var(--muted);margin:10px 2px 0}
