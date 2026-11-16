@@ -218,7 +218,7 @@ function renderList(){
     var isPaid = paidFirst.indexOf(i2) !== -1;
     html += '<div class="list-item' + (isPaid ? ' paid-item' : '') + '" data-idx="' + i2 + '"><div class="ti">' +
       (v[5]===2 ? '&#127942;' : v[5]===1 ? '&#9989;' : v[5]===3 ? '&#127849;' : '&#127860;') + '</div>' +
-      '<div class="lt"><b>' + esc(v[0]) + '</b>' + (isPaid ? '<span class="paidtag">PAID</span>' : '') + '<small>' + esc(v[1]) + (geo ? ' &middot; ' + distLabel(geoDist(i2)) : '') +
+      '<div class="lt"><b>' + esc(v[0]) + '</b>' + (isPaid ? '<span class="paidtag">PAID</span>' : '') + (ENR[String(i2)] && ENR[String(i2)].rt ? '<span class="lstars">&#11088;' + ENR[String(i2)].rt + '</span>' : '') + '<small>' + esc(v[1]) + (geo ? ' &middot; ' + distLabel(geoDist(i2)) : '') +
       (v[4] ? ' &middot; ' + esc(v[4].slice(0,52)) : '') + '</small></div>' +
       '<span class="tier ' + t.cls + '">' + t.label + '</span></div>';
   }
@@ -444,6 +444,10 @@ function requestGeo(){
   }, { timeout: 10000 });
 }
 
+/* ---------- Places sweep enrichment (phone/hours/rating/website) ---------- */
+var ENR = {};
+fetch('./enrichment.json').then(function(r){ return r.ok ? r.json() : null; }).then(function(d){ if (d) ENR = d; }).catch(function(){});
+
 /* ---------- suburb enrichment (search by suburb) ---------- */
 var SUBURBS = {};
 fetch('./suburbs.json').then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
@@ -482,6 +486,15 @@ function openVenue(idx){
     '<div class="tiersub">' + t.sub + '</div></div>' +
     /* Tee rule (16 Nov): closure status visible before the Directions tap */
     (v[4] && v[4].indexOf('[Google:') !== -1 ? '<div class="closedchip">&#9888;&#65039; Temporarily closed (Google) - check before you drive</div>' : '') +
+    /* Places sweep data (phone / hours / rating / verified stamp) */
+    (function(){ var E = ENR[String(idx)]; if (!E) return '';
+      var h = '<div class="infobox">';
+      if (E.rt) h += '<div class="inforow">&#11088; <b>' + E.rt + '</b> <small>(' + E.rc + ' Google reviews)</small></div>';
+      if (E.ph) h += '<div class="inforow">&#128222; <a href="tel:' + E.ph.replace(/[^+\d]/g, '') + '">' + esc(E.ph) + '</a> <small>&mdash; ring ahead, ask about GF practice</small></div>';
+      if (E.hr) h += '<div class="inforow">&#128340; <small>' + esc(E.hr) + '</small></div>';
+      h += '<div class="verstamp">&#9989; Venue details verified ' + E.vd + ' via Google</div></div>';
+      return h;
+    })() +
     (v[4] ? '<div class="notesbox"><b>COMMUNITY NOTES</b>' + esc(v[4]) + '</div>' : '') +
     '<div class="iconrow">' +
       (function(){ var t = TAGS[idx] || 0, h = '';
@@ -493,8 +506,9 @@ function openVenue(idx){
       '<a class="btn dirbtn" href="https://www.google.com/maps/dir/?api=1&destination=' + v[2] + ',' + v[3] + '" target="_blank" rel="noopener">&#129686; Directions</a>' +
       /* Tee rule: never scrape or store Google reviews - link out to the
          venue's own Google listing (fresh reviews, $0, Google-terms-safe) */
-      '<a class="btn ghost" href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(v[0] + ' ' + (SUBURBS[String(idx)] || v[1])) + '" target="_blank" rel="noopener">&#11088; Google reviews</a>' +
-      (WEBSITES[idx] ? '<a class="btn dirbtn web" href="' + esc(WEBSITES[idx]) + '" target="_blank" rel="noopener">&#127760; Website</a>' : '') +
+      '<a class="btn ghost" href="' + (ENR[String(idx)] && ENR[String(idx)].uri ? ENR[String(idx)].uri : 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(v[0] + ' ' + (SUBURBS[String(idx)] || v[1]))) + '" target="_blank" rel="noopener">&#11088; Google reviews</a>' +
+      ((ENR[String(idx)] && ENR[String(idx)].web) || WEBSITES[idx] ? '<a class="btn dirbtn web" href="' + esc((ENR[String(idx)] && ENR[String(idx)].web) || WEBSITES[idx]) + '" target="_blank" rel="noopener">&#127760; Website</a>' : '') +
+      (ENR[String(idx)] && ENR[String(idx)].uri ? '<a class="btn ghost" href="' + ENR[String(idx)].uri + '" target="_blank" rel="noopener">&#128196; Menu on Google</a>' : '') +
     '</div>' +
     ((v[2] !== 0 || v[3] !== 0) ? '<div id="vmap"></div>' : '') +
     '<div class="safety">' + SAFETY_LINE + '</div>' +
@@ -697,7 +711,7 @@ $('saveEmail').addEventListener('click', function(){
 
 /* ---------- service worker ---------- */
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js?build=34').catch(function(){});
+  navigator.serviceWorker.register('sw.js?build=35').catch(function(){});
 }
 
 /* ---------- initial list ---------- */
