@@ -102,6 +102,7 @@ select#stateSel{border:1.5px solid var(--border);background:#fff;border-radius:9
 .inforow a{color:var(--green);font-weight:700}
 .verstamp{color:var(--muted);font-size:11px;margin-top:6px}
 .lstars{color:#B8860B;font-size:10px;font-weight:700;margin-left:4px}
+.pendchip{display:inline-block;background:#FFF3CD;color:#8A6D1C;font-size:9px;font-weight:700;padding:1px 6px;border-radius:999px;margin-left:4px}
 .paidtag{display:inline-block;margin-left:6px;background:#B8860B;color:#fff;font-size:9px;font-weight:700;letter-spacing:.5px;padding:1px 6px;border-radius:999px;vertical-align:2px}
 .mapcard b{font-size:13.5px;display:block}
 .mapcard .meta{font-size:11px;color:var(--muted);margin:2px 0 8px}

@@ -25,7 +25,7 @@ var FEATURED = (function () {
   });
   return out;
 })();
-var LS_REV = 'gfc_reviews_v1', LS_SAVED = 'gfc_saved_v1', LS_EMAIL = 'gfc_scan_email_v1';
+var LS_REV = 'gfc_reviews_v1', LS_SAVED = 'gfc_saved_v1', LS_EMAIL = 'gfc_scan_email_v1', LS_OUT = 'gfc_review_outbox_v1';
 
 /* ---------- data prep (lowercase search strings precomputed once) ---------- */
 var N = VENUES.length, SEARCH = new Array(N), STATES = {};
@@ -525,10 +525,9 @@ function openVenue(idx){
     '<label class="phototile" id="tileMenu">&#128220; Menu snap<br><small>tap to attach</small><input type="file" accept="image/*" hidden id="fileMenu"></label>' +
     '<label class="phototile" id="tileFood">&#127860; Food snap<br><small>tap to attach</small><input type="file" accept="image/*" hidden id="fileFood"></label>' +
     '</div>' +
-    '<input class="comment" id="revComment" maxlength="200" placeholder="One line - how did it feel to eat here?">' +
-    '<button class="btn" id="revSave">Save to my device</button>' +
-    '<button class="btn dirbtn" id="revPost" style="margin-left:6px">&#128075; Post it to the community</button>' +
-    '<div style="font-size:10.5px;color:#8A948B;margin-top:6px">Save keeps it on this device. Post sends it to Gluten Free Club - after a quick check, it shows for everyone.</div>' +
+    '<input class="comment" id="revComment" maxlength="200" placeholder="One line - how did it feel to eat here? (optional)">' +
+    '<button class="btn dirbtn" id="revPost">&#128075; Post review</button>' +
+    '<div style="font-size:10.5px;color:#8A948B;margin-top:6px">One tap, no signup. The club gives first-time reviewers a quick check, then it goes live for everyone.</div>' +
     '<div id="revList"></div>' +
     '</div>' +
     '<div class="stack"><a class="btn ghost center" target="_blank" rel="noopener" href="' + FORM_URL + '">Claim this venue &#8250;</a></div>' +
@@ -553,12 +552,31 @@ function openVenue(idx){
     })(s);
   }
   /* photo placeholders - delegated so tile re-renders keep working */
-  $('revSave').addEventListener('click', function(){ saveReview(idx); });
+  $('revSave') && ($('revSave').style.display = 'none');
+  /* Tee rule (16 Nov): no external form - the in-app composer IS the review.
+     One tap posts it; until the accounts backend lands it queues locally and
+     shows as "pending check" (the Gate C outbox flushes it when built). */
   $('revPost').addEventListener('click', function(){
-    var v = VENUES[idx];
-    var url = REVIEW_FORM_URL + '?usp=pp_url' +
-      '&entry.41758106=' + encodeURIComponent(v[0]);
-    window.open(url, '_blank', 'noopener');
+    if (!curStars) { alert('Tap a star rating first \u2B50'); return; }
+    var checks = [];
+    document.querySelectorAll('#page-venue .checks input:checked').forEach(function(c){ checks.push(c.dataset.c); });
+    var comment = $('revComment').value.trim();
+    var date = new Date().toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' });
+    var all = getReviews();
+    if (!all[idx]) all[idx] = [];
+    all[idx].push({ stars: curStars, checks: checks, comment: comment, menu: curMenuFile, food: curFoodFile, date: date, status: 'pending' });
+    store(LS_REV, all);
+    var out = load(LS_OUT, []);
+    out.push({ idx: idx, venue: VENUES[idx][0], stars: curStars, checks: checks,
+               comment: comment, hasMenu: !!curMenuFile, hasFood: !!curFoodFile,
+               date: date, status: 'pending' });
+    store(LS_OUT, out);
+    closeComposer(); renderRevs(idx);
+    var box = $('revList');
+    if (box) { var n = document.createElement('div');
+      n.style.cssText = 'background:#EAF4EA;border-radius:10px;padding:8px 12px;margin-top:8px;font-size:12px;color:#2E5B3F';
+      n.innerHTML = '&#9989; <b>Sent!</b> The club gives first-time reviewers a quick check, then it shows for everyone.';
+      box.parentNode.insertBefore(n, box); }
   });
   renderRevs(idx);
   /* mini map */
@@ -621,6 +639,7 @@ function renderRevs(idx){
     html += '<h3 class="sect" style="margin-top:14px">Your reviews</h3>';
     revs.forEach(function(r){
       html += '<div class="savedrev"><b>' + '\u2B50'.repeat(r.stars) + '</b>' +
+        (r.status === 'pending' ? ' <span class="pendchip">Pending check</span>' : '') +
         (r.comment ? '<div>' + esc(r.comment) + '</div>' : '') +
         (r.checks && r.checks.length ? '<div class="chips">' + r.checks.map(function(c){ return '<span>&#9989; ' + esc(c) + '</span>'; }).join('') + '</div>' : '') +
         '<small>' + esc(r.date || '') + (r.menu ? ' &middot; menu snap attached' : '') + (r.food ? ' &middot; food snap attached' : '') + '</small></div>';
@@ -711,7 +730,7 @@ $('saveEmail').addEventListener('click', function(){
 
 /* ---------- service worker ---------- */
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js?build=35').catch(function(){});
+  navigator.serviceWorker.register('sw.js?build=36').catch(function(){});
 }
 
 /* ---------- initial list ---------- */
