@@ -527,7 +527,7 @@ function openVenue(idx){
     '</div>' +
     '<input class="comment" id="revComment" maxlength="200" placeholder="One line - how did it feel to eat here? (optional)">' +
     '<button class="btn dirbtn" id="revPost">&#128075; Post review</button>' +
-    '<div style="font-size:10.5px;color:#8A948B;margin-top:6px">One tap, no signup. The club gives first-time reviewers a quick check, then it goes live for everyone.</div>' +
+    '<div style="font-size:10.5px;color:#8A948B;margin-top:6px">One tap, no signup - it shows straight away. Spam or fakes get removed by the club.</div>' +
     '<div id="revList"></div>' +
     '</div>' +
     '<div class="stack"><a class="btn ghost center" target="_blank" rel="noopener" href="' + FORM_URL + '">Claim this venue &#8250;</a></div>' +
@@ -564,8 +564,10 @@ function openVenue(idx){
     var date = new Date().toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' });
     var all = getReviews();
     if (!all[idx]) all[idx] = [];
-    all[idx].push({ stars: curStars, checks: checks, comment: comment, menu: curMenuFile, food: curFoodFile, date: date, status: 'pending' });
+    all[idx].push({ stars: curStars, checks: checks, comment: comment, menu: curMenuFile, food: curFoodFile, date: date });
     store(LS_REV, all);
+    /* outbox copy still flagged pending - the Gate C backend sync decides
+       global visibility, but the review itself is never held back */
     var out = load(LS_OUT, []);
     out.push({ idx: idx, venue: VENUES[idx][0], stars: curStars, checks: checks,
                comment: comment, hasMenu: !!curMenuFile, hasFood: !!curFoodFile,
@@ -575,7 +577,7 @@ function openVenue(idx){
     var box = $('revList');
     if (box) { var n = document.createElement('div');
       n.style.cssText = 'background:#EAF4EA;border-radius:10px;padding:8px 12px;margin-top:8px;font-size:12px;color:#2E5B3F';
-      n.innerHTML = '&#9989; <b>Sent!</b> The club gives first-time reviewers a quick check, then it shows for everyone.';
+      n.innerHTML = '&#9989; <b>Posted!</b> Thanks - that helps the whole tribe.';
       box.parentNode.insertBefore(n, box); }
   });
   renderRevs(idx);
@@ -639,7 +641,6 @@ function renderRevs(idx){
     html += '<h3 class="sect" style="margin-top:14px">Your reviews</h3>';
     revs.forEach(function(r){
       html += '<div class="savedrev"><b>' + '\u2B50'.repeat(r.stars) + '</b>' +
-        (r.status === 'pending' ? ' <span class="pendchip">Pending check</span>' : '') +
         (r.comment ? '<div>' + esc(r.comment) + '</div>' : '') +
         (r.checks && r.checks.length ? '<div class="chips">' + r.checks.map(function(c){ return '<span>&#9989; ' + esc(c) + '</span>'; }).join('') + '</div>' : '') +
         '<small>' + esc(r.date || '') + (r.menu ? ' &middot; menu snap attached' : '') + (r.food ? ' &middot; food snap attached' : '') + '</small></div>';
@@ -730,7 +731,7 @@ $('saveEmail').addEventListener('click', function(){
 
 /* ---------- service worker ---------- */
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js?build=36').catch(function(){});
+  navigator.serviceWorker.register('sw.js?build=37').catch(function(){});
 }
 
 /* ---------- initial list ---------- */
