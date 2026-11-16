@@ -39,7 +39,9 @@ button{font-family:inherit}
 /* ---- action cards ---- */
 .grid{display:flex;flex-direction:column;gap:12px}
 .card{border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;position:relative;overflow:hidden;min-height:64px;border:none;text-align:left;width:100%}
-.card.pink{background:var(--pink)}.card.mint{background:var(--mint)}.card.peach{background:var(--peach)}
+.card.pink{background:linear-gradient(135deg,#FDECF0,#F5D5DD)}
+.card.mint{background:linear-gradient(135deg,#EFF8EF,#DCEEE1)}
+.card.peach{background:linear-gradient(135deg,#FDF4E5,#F7E5CA)}
 .card .tile{width:44px;height:44px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 1px 3px rgba(0,0,0,.07);flex:none}
 .card .txt{flex:1}
 .card b{font-size:14.5px;display:block;color:var(--deep)}
@@ -69,9 +71,9 @@ button{font-family:inherit}
 .paidslot{background:#FFF7F0;border:1px dashed #E8A33D}
 .tiersub{font-size:10.5px;color:var(--muted);margin-top:3px}
 .rowbtns{display:flex;gap:8px;margin-top:10px}
-.btn{display:inline-block;background:var(--green);color:#fff;font-weight:700;font-size:13px;border-radius:999px;padding:9px 16px;cursor:pointer;border:none;text-decoration:none}
-.btn.ghost{background:#fff;color:var(--green);border:1.5px solid var(--green)}
-.btn.gold{background:var(--gold);color:#fff}
+.btn{display:inline-block;background:linear-gradient(135deg,#3F9C5C,#2E7D46);color:#fff;font-weight:700;font-size:13px;border-radius:999px;padding:9px 16px;cursor:pointer;border:none;text-decoration:none;box-shadow:0 2px 6px rgba(46,125,70,.25)}
+.btn.ghost{background:#fff;color:var(--green);border:1.5px solid var(--green);box-shadow:none}
+.btn.gold{background:linear-gradient(135deg,#F2B255,#E8A33D);color:#fff;box-shadow:0 2px 6px rgba(232,163,61,.3)}
 .btn.small{font-size:12px;padding:7px 13px}
 .credit{margin:20px 4px 6px;font-size:11px;color:#8A948B;text-align:center}
 .safety{margin-top:10px;background:#FDF3E3;border:1px solid #F2DDB6;color:#7A5A1E;border-radius:12px;padding:8px 10px;font-size:11.5px}
@@ -80,13 +82,13 @@ button{font-family:inherit}
 .searchbar{display:flex;gap:8px;margin:2px 0 10px}
 .searchbar input{flex:1;border:1px solid var(--border);border-radius:999px;padding:11px 16px;font-size:14px;background:#fff;color:var(--deep);min-width:0}
 .searchbar input:focus{outline:2px solid var(--mint)}
-.geo-btn{background:var(--gold);color:#fff;border:none;border-radius:999px;font-weight:700;font-size:13px;padding:0 16px;cursor:pointer;white-space:nowrap}
+.geo-btn{background:linear-gradient(135deg,#F2B255,#E8A33D);color:#fff;border:none;border-radius:999px;font-weight:700;font-size:13px;padding:0 16px;cursor:pointer;white-space:nowrap;box-shadow:0 2px 6px rgba(232,163,61,.3)}
 .filters{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
 .fchip{border:1.5px solid var(--border);background:#fff;border-radius:999px;font-size:11.5px;font-weight:700;padding:7px 12px;cursor:pointer;color:var(--deep)}
 .fchip.on{background:var(--green);border-color:var(--green);color:#fff}
 .fchip .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:1px}
 select#stateSel{border:1.5px solid var(--border);background:#fff;border-radius:999px;font-size:12px;padding:7px 10px;color:var(--deep);max-width:110px}
-#map{height:360px;border-radius:18px;border:1px solid var(--border);z-index:1;background:#E8EFE8}
+#map{height:353px;border-radius:18px;border:1px solid var(--border);z-index:1;background:#E8EFE8}
 #map .gfc-dot{border-radius:50%;border:2px solid #fff;box-shadow:0 0 2px rgba(0,0,0,.4)}
 .mapcard{position:absolute;left:10px;right:10px;bottom:10px;background:#fff;border-radius:14px;box-shadow:0 4px 18px rgba(0,0,0,.18);padding:10px 14px;display:none;z-index:500}
 #mapwrap{position:relative}

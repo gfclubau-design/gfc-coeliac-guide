@@ -112,7 +112,6 @@ function showTab(id){
   if (id === 'page-scan') { var e = load(LS_EMAIL,''); if (e) { $('scanEmail').value = e; $('emailSaved').style.display='block'; } }
 }
 $('go-find').addEventListener('click', function(){ showTab('page-nearme'); });
-$('go-review').addEventListener('click', function(){ showTab('page-nearme'); });
 $('go-scan').addEventListener('click', function(){ showTab('page-scan'); });
 
 /* ---------- featured venues (guide) ---------- */
@@ -158,6 +157,24 @@ function renderList(){
     var vb = (VENUES[b][2] === 0 && VENUES[b][3] === 0) ? 1e12 : haversine(geo.lat, geo.lng, VENUES[b][2], VENUES[b][3]);
     return va - vb;
   });
+
+  /* Tee rule: searching a suburb flies the map there (e.g. type Chermside ->
+     the map zooms to Chermside). Only refit when the search text CHANGES, so
+     tapping filter chips never makes the map jump around. */
+  if (q && map && idxs.length) {
+    if (q !== renderList.__lastFit) {
+      renderList.__lastFit = q;
+      var pts = [];
+      for (var pf = 0; pf < idxs.length && pts.length < 200; pf++) {
+        var vv = VENUES[idxs[pf]];
+        if (vv[2] !== 0 || vv[3] !== 0) pts.push([vv[2], vv[3]]);
+      }
+      if (pts.length === 1) map.setView(pts[0], 15);
+      else if (pts.length) map.fitBounds(L.latLngBounds(pts), { padding: [40, 40], maxZoom: 14 });
+    }
+  } else if (!q) {
+    renderList.__lastFit = '';
+  }
 
   var total = idxs.length, show = idxs.slice(0, 300);
   curList = show;
@@ -615,7 +632,7 @@ $('saveEmail').addEventListener('click', function(){
 
 /* ---------- service worker ---------- */
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js?build=21').catch(function(){});
+  navigator.serviceWorker.register('sw.js?build=22').catch(function(){});
 }
 
 /* ---------- initial list ---------- */
