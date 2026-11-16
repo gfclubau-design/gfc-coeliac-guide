@@ -257,7 +257,28 @@ var map = null, markers = null, markerIdx = [];
 function initMap(){
   if (map) { setTimeout(function(){ map.invalidateSize(); }, 50); return; }
   if (typeof L === 'undefined') { $('map').innerHTML = '<div style="padding:40px;text-align:center;color:#6B7A6E">Map failed to load - check your connection.</div>'; return; }
-  map = L.map('map', { preferCanvas: true }).setView([-27.47, 153.03], 9);
+  /* Tee rule (16 Nov): one finger scrolls the page; the map only responds to
+     two fingers - pinch to zoom, two-finger drag to pan. Drag is off for touch. */
+  map = L.map('map', { preferCanvas: true, dragging: !L.Browser.touch, touchZoom: true }).setView([-27.47, 153.03], 9);
+  (function(){
+    var el = document.getElementById('map'), lastC = null;
+    el.addEventListener('touchstart', function(e){
+      if (e.touches.length === 2) {
+        lastC = [(e.touches[0].clientX + e.touches[1].clientX) / 2,
+                 (e.touches[0].clientY + e.touches[1].clientY) / 2];
+      } else { lastC = null; }
+    }, { passive: true });
+    el.addEventListener('touchmove', function(e){
+      if (e.touches.length === 2 && lastC) {
+        e.preventDefault();
+        var cx = (e.touches[0].clientX + e.touches[1].clientX) / 2,
+            cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        map.panBy([lastC[0] - cx, lastC[1] - cy], { animate: false });
+        lastC = [cx, cy];
+      } else { lastC = null; }
+    }, { passive: false });
+    el.addEventListener('touchend', function(){ lastC = null; });
+  })();
   L.tileLayer('https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> style &copy; <a href="https://www.hotosm.org/">Humanitarian OSM Team</a>' }).addTo(map);
   markers = L.layerGroup().addTo(map);
   var cnt = document.createElement('div');
@@ -638,7 +659,7 @@ $('saveEmail').addEventListener('click', function(){
 
 /* ---------- service worker ---------- */
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js?build=27').catch(function(){});
+  navigator.serviceWorker.register('sw.js?build=28').catch(function(){});
 }
 
 /* ---------- initial list ---------- */
