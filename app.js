@@ -348,7 +348,7 @@ function renderPins(){
 }
 function showMapCard(idx){
   var v = VENUES[idx], t = TIERS[v[5]], card = $('mapcard');
-  card.innerHTML = '<b>' + esc(v[0]) + '</b><div class="meta">' + esc(v[1]) + ' &middot; <span class="tier ' + t.cls + '">' + t.label + '</span></div>' +
+  card.innerHTML = '<button class="cardx" id="mcX" title="Close">&times;</button><b>' + esc(v[0]) + '</b><div class="meta">' + esc(v[1]) + ' &middot; <span class="tier ' + t.cls + '">' + t.label + '</span></div>' +
     /* Tee rule (16 Nov): closure status visible BEFORE anyone navigates */
     (v[4] && v[4].indexOf('[Google:') !== -1 ? '<div class="closedchip">&#9888;&#65039; Temporarily closed (Google)</div>' : '') +
     '<div class="actrow">' +
@@ -357,6 +357,7 @@ function showMapCard(idx){
     '<button class="btn small" id="mcOpen">View venue &#8250;</button></div>';
   card.style.display = 'block';
   $('mcOpen').onclick = function(){ openVenue(idx); };
+  $('mcX').onclick = function(){ card.style.display = 'none'; };
 }
 function applyPinFilter(){
   if (!markers) return;
@@ -663,7 +664,7 @@ $('saveEmail').addEventListener('click', function(){
 
 /* ---------- service worker ---------- */
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js?build=30').catch(function(){});
+  navigator.serviceWorker.register('sw.js?build=31').catch(function(){});
 }
 
 /* ---------- initial list ---------- */

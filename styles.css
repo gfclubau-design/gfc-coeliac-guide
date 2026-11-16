@@ -93,6 +93,7 @@ select#stateSel{border:1.5px solid var(--border);background:#fff;border-radius:9
 .mapcard{position:absolute;left:10px;right:10px;bottom:10px;background:#fff;border-radius:14px;box-shadow:0 4px 18px rgba(0,0,0,.18);padding:10px 14px;display:none;z-index:500}
 #mapwrap{position:relative}
 .closedchip{background:#FBE3E6;color:#8E2A3A;font-size:11px;font-weight:700;border-radius:8px;padding:4px 8px;margin:6px 0}
+.cardx{position:absolute;top:4px;right:8px;background:none;border:none;font-size:20px;line-height:1;color:var(--muted);cursor:pointer;padding:4px 6px;z-index:2}
 .mapcard b{font-size:13.5px;display:block}
 .mapcard .meta{font-size:11px;color:var(--muted);margin:2px 0 8px}
 .listmeta{font-size:11.5px;color:var(--muted);margin:10px 2px 0}
