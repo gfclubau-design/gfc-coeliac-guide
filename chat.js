@@ -42,7 +42,7 @@ function chatPaint(){
   $('boardTabs').innerHTML = html;
   $('boardTabs').querySelectorAll('button').forEach(function(btn){
     btn.addEventListener('click', function(){
-      chatBoard = btn.getAttribute('data-b'); save('gfapp_board', chatBoard);
+      chatBoard = btn.getAttribute('data-b'); store('gfapp_board', chatBoard);
       loadPosts();
     });
   });
