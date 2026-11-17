@@ -1,5 +1,5 @@
 /* GFC Coeliac Guide - offline shell cache (staging demo) */
-var CACHE = 'gfc-shell-v44';
+var CACHE = 'gfc-shell-v45';
 var ASSETS = [
   './',
   './index.html',
@@ -29,6 +29,8 @@ self.addEventListener('activate', function (e) {
 });
 self.addEventListener('fetch', function (e) {
   if (e.request.method !== 'GET') return;
+  // never cache the chat API - each board must come fresh from the network
+  if (e.request.url.indexOf('/api/') !== -1) return;
   e.respondWith(
     caches.match(e.request, { ignoreSearch: true }).then(function (hit) {
       if (hit) return hit;
