@@ -218,3 +218,40 @@ input.comment{width:100%;border:1px solid var(--border);border-radius:12px;paddi
 
 .sharebtn{margin-left:auto;background:var(--mint);color:var(--green);border:none;border-radius:14px;padding:8px 14px;font-size:12px;font-weight:700;white-space:nowrap}
 .sharebtn:active{background:var(--gold)}
+
+/* ---- community chat (Gate C) ---- */
+.boardtabs{display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px;scrollbar-width:none}
+.boardtabs::-webkit-scrollbar{display:none}
+.boardtabs button{flex:none;background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:7px 13px;font-size:12.5px;font-weight:700;color:var(--muted);cursor:pointer;font-family:inherit}
+.boardtabs button.on{background:var(--gold);border-color:var(--gold);color:#fff}
+.authcard{background:#fff;border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px;border:1px solid var(--border);margin-bottom:10px}
+.authtabs{display:flex;gap:4px;background:var(--cream);border-radius:10px;padding:3px}
+.authtab{flex:1;border:none;background:none;border-radius:8px;padding:7px;font-size:12.5px;font-weight:700;color:var(--muted);cursor:pointer;font-family:inherit}
+.authtab.on{background:#fff;color:var(--deep);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.authcard input{border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;background:var(--cream)}
+.authcard input:focus{outline:none;border-color:var(--gold)}
+.authmsg{font-size:12px;color:var(--ribbon);min-height:15px;margin-top:2px}
+.authmsg.ok{color:var(--green)}
+.composer{background:#fff;border-radius:16px;padding:12px;border:1px solid var(--border);margin-bottom:8px}
+.composer textarea{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;resize:none;background:var(--cream)}
+.composer textarea:focus{outline:none;border-color:var(--gold)}
+.composer .btn{width:100%;margin-top:8px}
+.postcard{background:#fff;border-radius:16px;padding:12px 14px;border:1px solid var(--border);margin-bottom:9px}
+.phead{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.pavatar{width:30px;height:30px;border-radius:50%;background:var(--mint);color:var(--green);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex:none}
+.pname{font-weight:800;font-size:13.5px}
+.pwhen{font-size:11px;color:var(--muted)}
+.pclub{background:var(--gold);color:#fff;font-size:9px;font-weight:800;border-radius:8px;padding:2px 7px;letter-spacing:.5px}
+.ptext{font-size:14px;line-height:1.45;white-space:pre-wrap;word-wrap:break-word}
+.pfoot{display:flex;gap:14px;margin-top:8px}
+.pfoot button{background:none;border:none;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;padding:0;font-family:inherit}
+.pfoot button:active{color:var(--gold)}
+.replies{margin-top:8px;border-top:1px dashed var(--border);padding-top:8px;display:flex;flex-direction:column;gap:7px}
+.reply{display:flex;gap:7px}
+.reply .pavatar{width:24px;height:24px;font-size:11px}
+.reply .ptext{font-size:13.5px}
+.replybox{display:flex;gap:6px;margin-top:8px}
+.replybox input{flex:1;border:1.5px solid var(--border);border-radius:10px;padding:8px 10px;font-size:13px;font-family:inherit;background:var(--cream)}
+.replybox input:focus{outline:none;border-color:var(--gold)}
+.replybox .btn{padding:8px 12px;margin:0}
+.empty{ text-align:center;color:var(--muted);font-size:13px;padding:26px 10px }

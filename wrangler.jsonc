@@ -1,8 +1,20 @@
 // Cloudflare Workers Builds config - name locked so the URL is gfapp.hemes.workers.dev
 {
-  "name": "gfapp",
-  "compatibility_date": "2026-11-16",
-  "workers_dev": true,
-  "preview_urls": false,
-  "assets": { "directory": "." }
+	"name": "gfapp",
+	"account_id": "d01dff3bfe355cd5d373e508ec0f06ec",
+	"main": "worker.js",
+	"compatibility_date": "2026-11-16",
+	"workers_dev": true,
+	"preview_urls": false,
+	"assets": {
+		"directory": ".",
+		"binding": "ASSETS"
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "gfapp-db",
+			"database_id": "aa4215d6-c902-4b72-ab92-ceebbf20f925"
+		}
+	]
 }

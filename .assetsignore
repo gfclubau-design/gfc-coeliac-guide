@@ -1,0 +1,14 @@
+# Never serve these - secrets or build files (Workers static assets)
+.env
+*.py
+*.bak*
+*.bak-*
+schema.sql
+worker.js
+wrangler.jsonc
+geocode-queue.json
+new-reviews-draft.json
+review-form.json
+geocode-suburbs.py
+build-suburbs-json.py
+gfc-review-merge.py

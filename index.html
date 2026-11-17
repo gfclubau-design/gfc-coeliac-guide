@@ -143,11 +143,53 @@
     <div class="credit">Venue data seeded from the community-built gluten-free map with thanks to its contributors.</div>
   </section>
 
+  <!-- ============ TAB: CHAT ============ -->
+  <section class="screen" id="page-chat">
+    <div class="logo-row">
+      <img class="logoimg" src="logo.png" alt="Gluten Free Club">
+      <div class="who">
+        <div class="eyebrow">Community</div>
+        <div class="title" id="chatBoardTitle">Coeliacs SEQ</div>
+        <div class="sub" id="chatBoardSub">Chat with your local coeliacs</div>
+      </div>
+    </div>
+
+    <div class="chip" id="chatWho">
+      <div class="ic">&#128172;</div>
+      <div><b id="chatWhoTitle">Say g'day</b><span id="chatWhoSub">Log in or make a quick account to post</span></div>
+    </div>
+
+    <div class="authcard" id="chatAuth">
+      <div class="authtabs">
+        <button class="authtab on" id="authTabLogin">Log in</button>
+        <button class="authtab" id="authTabSignup">New here</button>
+      </div>
+      <input id="authName" placeholder="Display name (e.g. Sally S)" style="display:none" maxlength="30" autocomplete="nickname">
+      <input id="authEmail" type="email" placeholder="Email" autocomplete="email">
+      <input id="authPass" type="password" placeholder="Password (8+ characters)" autocomplete="current-password">
+      <button class="btn gold" id="authGo" style="width:100%">Log in</button>
+      <div class="authmsg" id="authMsg"></div>
+    </div>
+
+    <div id="chatComposer" style="display:none">
+      <div class="composer">
+        <textarea id="postText" rows="3" maxlength="1000" placeholder="Ask anything - has anyone been to...? where do you eat in...?"></textarea>
+        <button class="btn gold" id="postBtn">Post</button>
+      </div>
+      <div class="authmsg" id="postMsg"></div>
+    </div>
+
+    <div class="boardtabs" id="boardTabs"></div>
+    <div class="listmeta" id="chatMeta"></div>
+    <div id="postList"></div>
+    <div class="safety">Be kind. Posts are public - never share personal details you wouldn't shout across a supermarket.</div>
+  </section>
+
   <!-- ============ BOTTOM NAV ============ -->
   <nav class="nav">
     <button data-tab="page-guide" class="on"><span>&#127968;</span>Guide</button>
     <button data-tab="page-nearme"><span>&#128269;</span>Near me</button>
-    <button data-tab="page-scan"><span>&#128247;</span>Scan</button>
+    <button data-tab="page-chat"><span>&#128172;</span>Chat</button>
     <button data-tab="page-club"><span>&#128101;</span>Club</button>
     <button id="youBtn"><span>&#128038;</span>You</button>
   </nav>
@@ -173,5 +215,6 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="venues.js"></script>
 <script src="app.js"></script>
+<script src="chat.js"></script>
 </body>
 </html>
