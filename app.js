@@ -508,7 +508,6 @@ function openVenue(idx){
          venue's own Google listing (fresh reviews, $0, Google-terms-safe) */
       '<a class="btn ghost" href="' + (ENR[String(idx)] && ENR[String(idx)].uri ? ENR[String(idx)].uri : 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(v[0] + ' ' + (SUBURBS[String(idx)] || v[1]))) + '" target="_blank" rel="noopener">&#11088; Google reviews</a>' +
       ((ENR[String(idx)] && ENR[String(idx)].web) || WEBSITES[idx] ? '<a class="btn dirbtn web" href="' + esc((ENR[String(idx)] && ENR[String(idx)].web) || WEBSITES[idx]) + '" target="_blank" rel="noopener">&#127760; Website</a>' : '') +
-      (ENR[String(idx)] && ENR[String(idx)].uri ? '<a class="btn ghost" href="' + ENR[String(idx)].uri + '" target="_blank" rel="noopener">&#128196; Menu on Google</a>' : '') +
     '</div>' +
     ((v[2] !== 0 || v[3] !== 0) ? '<div id="vmap"></div>' : '') +
     '<div class="safety">' + SAFETY_LINE + '</div>' +
