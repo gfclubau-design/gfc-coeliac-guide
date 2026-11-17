@@ -731,7 +731,7 @@ $('saveEmail').addEventListener('click', function(){
 
 /* ---------- service worker ---------- */
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js?build=38').catch(function(){});
+  navigator.serviceWorker.register('sw.js?build=39').catch(function(){});
 }
 
 /* ---------- initial list ---------- */
