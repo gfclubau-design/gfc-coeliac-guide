@@ -68,7 +68,7 @@ export default {
 
 async function route(req, env, path) {
   const me = await memberFromReq(req, env);
-  const m = path.match(/^\/api(\/.*)?$/)[1] || '/';
+  const m = path;
 
   // ---------- auth ----------
   if (m === '/api/signup' && req.method === 'POST') {
