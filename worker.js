@@ -67,6 +67,7 @@ export default {
 };
 
 async function route(req, env, path) {
+  const url = new URL(req.url);
   const me = await memberFromReq(req, env);
   const m = path;
 
