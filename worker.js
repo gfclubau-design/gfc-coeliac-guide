@@ -21,11 +21,11 @@ function cookieGet(req, name) {
 }
 
 function hashPassword(password, salt) {
-  // PBKDF2-SHA256, 120k iters
+  // PBKDF2-SHA256, 100k iters (Cloudflare Workers cap = 100,000)
   const enc = new TextEncoder();
   return crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits'])
     .then(key => crypto.subtle.deriveBits(
-      { name: 'PBKDF2', hash: 'SHA-256', salt: enc.encode(salt), iterations: 120000 },
+      { name: 'PBKDF2', hash: 'SHA-256', salt: enc.encode(salt), iterations: 100000 },
       key, 256))
     .then(buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join(''));
 }
