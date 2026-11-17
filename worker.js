@@ -51,6 +51,11 @@ const sessionHeaders = token => ({
 
 const clean = (s, max) => (s || '').replace(/\s+/g, ' ').trim().slice(0, max || 0) || '';
 
+// WikiCamps safety rule: no personal contact info (phone numbers) in posts.
+// 8+ digit runs (spaces/dashes allowed) = phone number territory.
+const NO_CONTACT_MSG = "For safety, please don't post phone numbers or addresses here - keep that to messages with the club. (WikiCamps has the same rule.)";
+const hasPhoneDigits = s => /[0-9][0-9\s\-()]{7,}[0-9]/.test(s);
+
 export default {
   async fetch(req, env) {
     const url = new URL(req.url);
@@ -135,6 +140,7 @@ async function route(req, env, path) {
     const text = clean(b.text, 1000);
     if (!board) return bad('Unknown board.');
     if (text.length < 2) return bad('Say a little more than that.');
+    if (hasPhoneDigits(text)) return bad(NO_CONTACT_MSG);
     // gentle rate limit: 5 posts per hour per member
     const recent = await env.DB.prepare(
       `SELECT COUNT(*) AS n FROM posts WHERE member_id = ?1 AND created_at > datetime('now','-1 hour')`)
@@ -168,6 +174,7 @@ async function route(req, env, path) {
     const b = await req.json().catch(() => ({}));
     const text = clean(b.text, 1000);
     if (text.length < 1) return bad('Say something first.');
+    if (hasPhoneDigits(text)) return bad(NO_CONTACT_MSG);
     const post = await env.DB.prepare('SELECT id FROM posts WHERE id = ?1 AND hidden = 0').bind(id).first();
     if (!post) return bad('Post not found.', 404);
     const recent = await env.DB.prepare(
