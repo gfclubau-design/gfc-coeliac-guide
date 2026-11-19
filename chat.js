@@ -1,15 +1,19 @@
 /* ---------- community chat (Gate C) ---------- */
 var CHAT_API = '/api';
+/* Tee rule 19 Nov: FB-type chat, one board per Australian capital city */
 var CHAT_BOARDS = [
-  { id: 'seq',        label: 'Coeliacs SEQ' },
-  { id: 'north-qld',  label: 'North QLD' },
-  { id: 'out-west',   label: 'Out West' },
-  { id: 'melbourne',  label: 'Melbourne' },
-  { id: 'sydney',     label: 'Sydney' }
+  { id: 'brisbane',  label: 'Brisbane' },
+  { id: 'sydney',    label: 'Sydney' },
+  { id: 'melbourne', label: 'Melbourne' },
+  { id: 'adelaide',  label: 'Adelaide' },
+  { id: 'perth',     label: 'Perth' },
+  { id: 'hobart',    label: 'Hobart' },
+  { id: 'darwin',    label: 'Darwin' },
+  { id: 'canberra',  label: 'Canberra' }
 ];
 var chatMe = null;           // {name, is_club}
-var chatBoard = load('gfapp_board', 'seq') || 'seq';
-if (!CHAT_BOARDS.some(function(b){ return b.id === chatBoard; })) chatBoard = 'seq';
+var chatBoard = load('gfapp_board', 'brisbane') || 'brisbane';
+if (!CHAT_BOARDS.some(function(b){ return b.id === chatBoard; })) chatBoard = 'brisbane';
 var chatAuthMode = 'login';
 
 function chatLabel(id){ var b = CHAT_BOARDS.filter(function(x){ return x.id === id; })[0]; return b ? b.label : id; }

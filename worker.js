@@ -2,7 +2,9 @@
 // Serves /api/* from D1; everything else falls through to static assets.
 // Rules locked by Tee: instant publish (WikiCamps model), no DMs,
 // trust = club removes spam after the fact (Report button + club badge).
-const BOARDS = ['seq', 'north-qld', 'out-west', 'melbourne', 'sydney'];
+/* Tee rule 19 Nov: one board per Australian capital city.
+   'seq'/'north-qld'/'out-west' rows are migrated to 'brisbane' in D1. */
+const BOARDS = ['brisbane', 'sydney', 'melbourne', 'adelaide', 'perth', 'hobart', 'darwin', 'canberra'];
 const COOKIE = 'gfapp_session';
 
 const json = (obj, status, headers) =>
@@ -187,10 +189,64 @@ async function route(req, env, path) {
     return json({ ok: true, id: r.id, name: me.name, is_club: me.is_club });
   }
 
+  // ---------- reviews (WikiCamps model: one tap, no signup, instant publish) ----------
+  // Tee rule 19 Nov: every review captures first name + last initial.
+  // Venue identity = normalised name + state, NOT the venues.js index (indices shift on every purge).
+  const normKey = (name, state) =>
+    (name || '').toLowerCase().replace(/\s+/g, ' ').trim().slice(0, 120) + '|' +
+    (state || '').toUpperCase().trim();
+
+  if (m === '/api/reviews' && req.method === 'POST') {
+    const b = await req.json().catch(() => ({}));
+    const stars = +b.stars;
+    if (!(stars >= 1 && stars <= 5)) return bad('Tap a star rating first.');
+    const first = clean(b.first, 20);
+    const last = (b.last || '').trim().charAt(0).toUpperCase();
+    if (!first || !/^[A-Za-z][A-Za-z' -]*$/.test(first))
+      return bad('Pop in your first name (one name is all it shows).');
+    if (!/^[A-Z]$/.test(last)) return bad('Add the first letter of your last name.');
+    const author = first + ' ' + last + '.';
+    const comment = clean(b.comment, 200);
+    if (comment && hasPhoneDigits(comment)) return bad(NO_CONTACT_MSG);
+    const checks = Array.isArray(b.checks)
+      ? b.checks.filter(c => typeof c === 'string').map(c => clean(c, 60)).slice(0, 8) : [];
+    const venueName = clean(b.venue, 120);
+    const venueState = clean(b.state, 3).toUpperCase();
+    if (!venueName || !venueState) return bad('Missing venue.');
+    // gentle rate limit: 5 reviews per hour per device (hashed ip, never stored raw)
+    const ip = req.headers.get('CF-Connecting-IP') || 'unknown';
+    const ipBuf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('gfc-ip-' + ip));
+    const ipHash = [...new Uint8Array(ipBuf)].map(x => x.toString(16).padStart(2, '0')).join('').slice(0, 16);
+    const recent = await env.DB.prepare(
+      `SELECT COUNT(*) AS n FROM reviews WHERE ip_hash = ?1 AND created_at > datetime('now','-1 hour')`)
+      .bind(ipHash).first();
+    if (recent.n >= 5) return bad('Easy tiger - 5 reviews an hour max. Try again a bit later.', 429);
+    const r = await env.DB.prepare(
+      `INSERT INTO reviews (venue_key, venue_name, venue_state, stars, checks, comment, author, ip_hash)
+       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8) RETURNING id`)
+      .bind(normKey(venueName, venueState), venueName, venueState, stars,
+        JSON.stringify(checks), comment, author, ipHash).first();
+    return json({ ok: true, id: r.id, author });
+  }
+
+  if (m === '/api/reviews' && req.method === 'GET') {
+    const venueKey = normKey(url.searchParams.get('venue') || '', url.searchParams.get('state') || '');
+    if (!venueKey.split('|')[0]) return bad('Missing venue.');
+    const { results } = await env.DB.prepare(
+      `SELECT id, venue_name, venue_state, stars, checks, comment, author, created_at
+       FROM reviews WHERE venue_key = ?1 AND hidden = 0 ORDER BY created_at DESC LIMIT 100`)
+      .bind(venueKey).all();
+    const rows = results.map(r => {
+      try { r.checks = JSON.parse(r.checks || '[]'); } catch (e) { r.checks = []; }
+      return r;
+    });
+    return json({ ok: true, venue: venueKey, reviews: rows });
+  }
+
   // ---------- reports (club moderation) ----------
   if (m === '/api/reports' && req.method === 'POST') {
     const b = await req.json().catch(() => ({}));
-    const kind = b.kind === 'reply' ? 'reply' : b.kind === 'post' ? 'post' : null;
+    const kind = ['post', 'reply', 'review'].indexOf(b.kind) !== -1 ? b.kind : null;
     if (!kind || !b.id) return bad('What are you reporting?');
     await env.DB.prepare('INSERT INTO reports (kind, target_id, member_id, reason) VALUES (?1, ?2, ?3, ?4)')
       .bind(kind, +b.id, me ? me.id : null, clean(b.reason, 300)).run();
@@ -200,7 +256,7 @@ async function route(req, env, path) {
   // ---------- club admin (hidden/reveal via club account) ----------
   if (m.startsWith('/api/admin/') && req.method === 'POST') {
     if (!me || !me.is_club) return bad('Club admins only.', 403);
-    const hm = m.match(/^\/api\/admin\/(posts|replies)\/(\d+)\/(hide|unhide)$/);
+    const hm = m.match(/^\/api\/admin\/(posts|replies|reviews)\/(\d+)\/(hide|unhide)$/);
     if (!hm) return bad('Unknown admin action.');
     await env.DB.prepare(`UPDATE ${hm[1]} SET hidden = ?1 WHERE id = ?2`)
       .bind(hm[3] === 'hide' ? 1 : 0, +hm[2]).run();

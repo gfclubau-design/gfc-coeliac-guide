@@ -37,6 +37,21 @@ CREATE TABLE IF NOT EXISTS replies (
 );
 CREATE INDEX IF NOT EXISTS idx_replies_post ON replies(post_id, created_at);
 
+CREATE TABLE IF NOT EXISTS reviews (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  venue_key TEXT NOT NULL,           -- normalised name|state - stable across venue index shifts
+  venue_name TEXT NOT NULL,
+  venue_state TEXT NOT NULL,
+  stars INTEGER NOT NULL CHECK(stars BETWEEN 1 AND 5),
+  checks TEXT NOT NULL DEFAULT '[]', -- JSON array of practice ticks
+  comment TEXT,
+  author TEXT NOT NULL,              -- 'First L.' (first name + last initial, Tee rule 19 Nov)
+  ip_hash TEXT,                      -- rate-limit only; hashed, never raw
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  hidden INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_reviews_venue ON reviews(venue_key, created_at DESC);
+
 CREATE TABLE IF NOT EXISTS reports (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   kind TEXT NOT NULL,             -- 'post' | 'reply'

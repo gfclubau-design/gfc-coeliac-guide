@@ -136,6 +136,11 @@ select#stateSel{border:1.5px solid var(--border);background:#fff;border-radius:9
 .phototile{flex:1;height:64px;border:2px dashed #C9BFAF;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);background:#fff;cursor:pointer;overflow:hidden;text-align:center;padding:4px}
 .phototile.has{border-style:solid;border-color:var(--green);color:var(--green);background:var(--mint)}
 input.comment{width:100%;border:1px solid var(--border);border-radius:12px;padding:11px 14px;font-size:13px;font-family:inherit;margin-bottom:10px}
+.revname{display:flex;gap:8px;margin-bottom:6px}
+.revname input{border:1px solid var(--border);border-radius:12px;padding:11px 14px;font-size:13px;font-family:inherit;min-width:0}
+.revname input#revFirst{flex:1}
+.revname input#revLast{width:56px;text-align:center}
+.revreport{background:none;border:none;color:#B3554D;font-size:11px;cursor:pointer;font-family:inherit;padding:0;margin-top:5px}
 .savedrev{background:#fff;border:1px solid var(--border);border-left:3px solid #CFE3CF;border-radius:12px;padding:10px 12px;margin-top:8px;font-size:12.5px}
 .savedrev small{display:block;color:var(--muted);margin-top:4px}
 .savedrev .chips{margin-top:6px;display:flex;gap:5px;flex-wrap:wrap}

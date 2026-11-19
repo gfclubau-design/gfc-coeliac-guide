@@ -512,7 +512,8 @@ function openVenue(idx){
     ((v[2] !== 0 || v[3] !== 0) ? '<div id="vmap"></div>' : '') +
     '<div class="safety">' + SAFETY_LINE + '</div>' +
     '<div id="seedBox"></div>' +
-    '<div class="revsec"><h3>Leave a review (demo)</h3>' +
+    '<div id="liveRevs"></div>' +
+    '<div class="revsec"><h3>Leave a review</h3>' +
     '<div class="starrow" id="starRow"></div>' +
     '<div class="checks">' +
     '<label><input type="checkbox" data-c="separate prep area"> Separate prep area</label>' +
@@ -525,6 +526,11 @@ function openVenue(idx){
     '<label class="phototile" id="tileFood">&#127860; Food snap<br><small>tap to attach</small><input type="file" accept="image/*" hidden id="fileFood"></label>' +
     '</div>' +
     '<input class="comment" id="revComment" maxlength="200" placeholder="One line - how did it feel to eat here? (optional)">' +
+    '<div class="revname">' +
+    '<input id="revFirst" maxlength="20" placeholder="First name" autocomplete="given-name">' +
+    '<input id="revLast" maxlength="1" placeholder="L" autocomplete="off" style="text-transform:uppercase">' +
+    '</div>' +
+    '<small style="display:block;font-size:10.5px;color:#8A948B;margin:-4px 0 10px">Shows as <b>First L.</b> - no sign up, no email.</small>' +
     '<button class="btn dirbtn" id="revPost">&#128075; Post review</button>' +
     '<div style="font-size:10.5px;color:#8A948B;margin-top:6px">One tap, no signup - it shows straight away. Spam or fakes get removed by the club.</div>' +
     '<div id="revList"></div>' +
@@ -552,34 +558,49 @@ function openVenue(idx){
   }
   /* photo placeholders - delegated so tile re-renders keep working */
   $('revSave') && ($('revSave').style.display = 'none');
+  /* remember the reviewer's name for next time (device-only, first name + last initial) */
+  var prevRev = load('gfc_reviewer_v1', null);
+  if (prevRev && prevRev.first) { $('revFirst').value = prevRev.first; $('revLast').value = prevRev.last || ''; }
   /* Tee rule (16 Nov): no external form - the in-app composer IS the review.
-     One tap posts it; until the accounts backend lands it queues locally and
-     shows as "pending check" (the Gate C outbox flushes it when built). */
+     One tap posts it: straight into the club database (D1), instantly.
+     Offline it saves on the phone and flushes on next open (flushOutbox). */
   $('revPost').addEventListener('click', function(){
     if (!curStars) { alert('Tap a star rating first \u2B50'); return; }
     var checks = [];
     document.querySelectorAll('#page-venue .checks input:checked').forEach(function(c){ checks.push(c.dataset.c); });
     var comment = $('revComment').value.trim();
+    var first = ($('revFirst').value || '').trim();
+    var last = ($('revLast').value || '').trim().charAt(0).toUpperCase();
+    if (!first || !/^[A-Za-z][A-Za-z' -]*$/.test(first)) { alert('Pop in your first name (one name is all it shows).'); return; }
+    if (!/^[A-Za-z]$/.test(last)) { alert('Add the first letter of your last name.'); return; }
+    var author = first + ' ' + last + '.';
+    store('gfc_reviewer_v1', { first: first, last: last });
+    var v = VENUES[idx];
     var date = new Date().toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' });
     var all = getReviews();
     if (!all[idx]) all[idx] = [];
-    all[idx].push({ stars: curStars, checks: checks, comment: comment, menu: curMenuFile, food: curFoodFile, date: date });
+    all[idx].push({ stars: curStars, checks: checks, comment: comment, menu: curMenuFile, food: curFoodFile, date: date, author: author });
     store(LS_REV, all);
-    /* outbox copy still flagged pending - the Gate C backend sync decides
-       global visibility, but the review itself is never held back */
+    /* outbox copy syncs to the club database (D1) - the review itself is never held back */
+    var item = { venue: v[0], state: v[1], stars: curStars, checks: checks,
+               comment: comment, first: first, last: last, hasMenu: !!curMenuFile, hasFood: !!curFoodFile,
+               date: date, status: 'pending' };
     var out = load(LS_OUT, []);
-    out.push({ idx: idx, venue: VENUES[idx][0], stars: curStars, checks: checks,
-               comment: comment, hasMenu: !!curMenuFile, hasFood: !!curFoodFile,
-               date: date, status: 'pending' });
+    out.push(item);
     store(LS_OUT, out);
     closeComposer(); renderRevs(idx);
-    var box = $('revList');
-    if (box) { var n = document.createElement('div');
-      n.style.cssText = 'background:#EAF4EA;border-radius:10px;padding:8px 12px;margin-top:8px;font-size:12px;color:#2E5B3F';
-      n.innerHTML = '&#9989; <b>Posted!</b> Thanks - that helps the whole tribe.';
-      box.parentNode.insertBefore(n, box); }
+    syncReview(item, function(ok){
+      var box = $('revList');
+      if (box) { var n = document.createElement('div');
+        n.style.cssText = 'background:#EAF4EA;border-radius:10px;padding:8px 12px;margin-top:8px;font-size:12px;color:#2E5B3F';
+        n.innerHTML = ok ? '&#9989; <b>Posted!</b> Thanks - that helps the whole tribe.'
+                         : '&#128244; Saved on your phone - it syncs next time you have signal.';
+        box.parentNode.insertBefore(n, box); }
+      if (ok) { store(LS_OUT, load(LS_OUT, []).filter(function(o){ return o !== item; })); loadLiveRevs(idx); }
+    });
   });
   renderRevs(idx);
+  loadLiveRevs(idx);
   /* mini map */
   setTimeout(function(){
     if (typeof L === 'undefined' || !$('vmap')) return;
@@ -631,7 +652,61 @@ function closeComposer(){
   $('starRow').querySelectorAll('button').forEach(function(x){ x.classList.remove('on'); });
   document.querySelectorAll('#page-venue .checks input').forEach(function(c){ c.checked = false; });
   $('revComment').value = '';
+  $('revFirst').value = ''; $('revLast').value = '';
   tileSet('tileMenu', '&#128220;', 'Menu snap', ''); tileSet('tileFood', '&#127860;', 'Food snap', '');
+}
+/* ---------- live reviews (club database, synced from every member's phone) ---------- */
+function fmtRevDate(iso){
+  if (!iso) return '';
+  var d = new Date(iso.indexOf('Z') === -1 && iso.length === 19 ? iso + 'Z' : iso);
+  return isNaN(d) ? '' : d.toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' });
+}
+function syncReview(item, cb){
+  fetch('/api/reviews', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ venue: item.venue, state: item.state, stars: item.stars,
+      checks: item.checks || [], comment: item.comment || '', first: item.first, last: item.last }) })
+    .then(function(r){ return r.json(); })
+    .then(function(d){ cb && cb(!!d.ok, d.error); })
+    .catch(function(){ cb && cb(false, 'offline'); });
+}
+/* on startup: flush reviews that were saved on this phone while offline */
+function flushOutbox(){
+  var out = load(LS_OUT, []);
+  if (!out.length) return;
+  out.forEach(function(item){
+    syncReview(item, function(ok){
+      if (!ok) return;
+      store(LS_OUT, load(LS_OUT, []).filter(function(o){ return o !== item; }));
+    });
+  });
+}
+function loadLiveRevs(idx){
+  var v = VENUES[idx]; if (!v) return;
+  var box = $('liveRevs'); if (!box) return;
+  fetch('/api/reviews?venue=' + encodeURIComponent(v[0]) + '&state=' + encodeURIComponent(v[1]))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (!d.ok || !d.reviews.length) { box.innerHTML = ''; return; }
+      var h = '<h3 class="sect" style="margin-top:14px">Member reviews <span class="seedtag">' + d.reviews.length + '</span></h3>';
+      d.reviews.forEach(function(r){
+        h += '<div class="savedrev"><div style="display:flex;justify-content:space-between;align-items:center">' +
+          '<span>' + '\u2B50'.repeat(r.stars) + '</span>' +
+          '<span style="color:#8A948B;font-size:11px">' + esc(r.author) + ' &middot; ' + esc(fmtRevDate(r.created_at)) + '</span></div>' +
+          (r.comment ? '<div>' + esc(r.comment) + '</div>' : '') +
+          (r.checks && r.checks.length ? '<div class="chips">' + r.checks.map(function(c){ return '<span>&#9989; ' + esc(c) + '</span>'; }).join('') + '</div>' : '') +
+          '<button class="revreport" data-id="' + r.id + '">Report</button></div>';
+      });
+      box.innerHTML = h;
+      box.querySelectorAll('.revreport').forEach(function(b){
+        b.addEventListener('click', function(){
+          fetch('/api/reports', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ kind: 'review', id: +b.getAttribute('data-id') }) })
+            .then(function(r){ return r.json(); })
+            .then(function(d){ b.textContent = d.ok ? 'Reported' : b.textContent; b.disabled = true; });
+        });
+      });
+    })
+    .catch(function(){});
 }
 function renderRevs(idx){
   var revs = getReviews()[idx] || [];
@@ -730,8 +805,11 @@ $('saveEmail').addEventListener('click', function(){
 
 /* ---------- service worker ---------- */
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js?build=45').catch(function(){});
+  navigator.serviceWorker.register('sw.js?build=47').catch(function(){});
 }
+
+/* flush reviews saved on this phone while offline (club database sync) */
+flushOutbox();
 
 /* ---------- initial list ---------- */
 renderList();
