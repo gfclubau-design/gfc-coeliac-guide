@@ -145,8 +145,8 @@ var curList = [];
    PAID_LOCAL = paid pool; the 2 nearest the user's location rotate in, so a
    traveller always sees a paid venue. DEMO venues for staging only - swap in
    real paid venues once the backend takes payments. */
-var PAID_TOP = 1982;                 /* Sushi Hub Queen Street Mall (demo) */
-var PAID_LOCAL = [1364, 1841, 1400, 1288];  /* Chermside, Ipswich, Gold Coast, Toowoomba (demo) */
+var PAID_TOP = 1887;                 /* Sushi Hub Queen Street Mall (demo) */
+var PAID_LOCAL = [1269, 1746, 1305, 1193];  /* Chermside, Ipswich, Gold Coast, Toowoomba (demo) */
 function paidRef(){
   var g = window.__geo;
   if (g) return g;
@@ -805,7 +805,7 @@ $('saveEmail').addEventListener('click', function(){
 
 /* ---------- service worker ---------- */
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js?build=47').catch(function(){});
+  navigator.serviceWorker.register('sw.js?build=48').catch(function(){});
 }
 
 /* flush reviews saved on this phone while offline (club database sync) */
