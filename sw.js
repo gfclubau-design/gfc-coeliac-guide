@@ -1,5 +1,5 @@
 /* GFC Coeliac Guide - offline shell cache (staging demo) */
-var CACHE = 'gfc-shell-v48';
+var CACHE = 'gfc-shell-v49';
 var ASSETS = [
   './',
   './index.html',

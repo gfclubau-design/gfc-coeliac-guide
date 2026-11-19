@@ -805,7 +805,7 @@ $('saveEmail').addEventListener('click', function(){
 
 /* ---------- service worker ---------- */
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js?build=48').catch(function(){});
+  navigator.serviceWorker.register('sw.js?build=49').catch(function(){});
 }
 
 /* flush reviews saved on this phone while offline (club database sync) */
