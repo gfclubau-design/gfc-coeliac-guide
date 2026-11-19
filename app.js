@@ -54,13 +54,16 @@ function haversine(lat1, lng1, lat2, lng2){
   var a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
-/* WikiCamps-style tag filters: bitfield TAGS from the community map notes */
+/* WikiCamps-style tag filters: bitfield TAGS from the community map notes.
+   128=Vegan friendly, 256=Keto options (mined diet flags, diet-flags.js). */
 var TAG_META = {
   1:  { icon: '&#127839;', label: 'Separate fryer' },
   2:  { icon: '&#128220;', label: 'Dedicated GF menu' },
   4:  { icon: '&#9989;',  label: 'Coeliac accredited' },
   8:  { icon: '&#127849;', label: 'GF donuts' },
-  16: { icon: '&#127838;', label: 'GF bread available' }
+  16: { icon: '&#127838;', label: 'GF bread available' },
+  128:{ icon: '&#127807;', label: 'Vegan friendly' },
+  256:{ icon: '&#129367;', label: 'Keto options' }
 };
 /* ---------- bread tag derivation (bit 16) - MUST run before the chip bar
    builds, or the Bread chip counts zero venues and hides itself ---------- */
@@ -68,6 +71,11 @@ var TAG_META = {
   for (var i = 0; i < N; i++) {
     var t = (VENUES[i][0] + ' ' + (VENUES[i][4] || '')).toLowerCase();
     if (t.indexOf('bread') !== -1 || t.indexOf('bakery') !== -1 || t.indexOf('bakehouse') !== -1) TAGS[i] = (TAGS[i] || 0) | 16;
+    /* diet flags: vegan (128) / keto (256) mined from the venue's own Google
+       listing text and top reviews - honest sourcing, no photo verification */
+    var f = DIET_FLAGS && DIET_FLAGS[VENUES[i][0].toLowerCase().replace(/[^a-z0-9]+/g, ' ').replace(/^ | $/g, '')];
+    if (f && f.v) TAGS[i] = (TAGS[i] || 0) | 128;
+    if (f && f.k) TAGS[i] = (TAGS[i] || 0) | 256;
   }
 })();
 
@@ -218,7 +226,7 @@ function renderList(){
     var isPaid = paidFirst.indexOf(i2) !== -1;
     html += '<div class="list-item' + (isPaid ? ' paid-item' : '') + '" data-idx="' + i2 + '"><div class="ti">' +
       (v[5]===2 ? '&#127942;' : v[5]===1 ? '&#9989;' : v[5]===3 ? '&#127849;' : '&#127860;') + '</div>' +
-      '<div class="lt"><b>' + esc(v[0]) + '</b>' + (isPaid ? '<span class="paidtag">PAID</span>' : '') + (ENR[String(i2)] && ENR[String(i2)].rt ? '<span class="lstars">&#11088;' + ENR[String(i2)].rt + '</span>' : '') + '<small>' + esc(v[1]) + (geo ? ' &middot; ' + distLabel(geoDist(i2)) : '') +
+      '<div class="lt"><b>' + esc(v[0]) + '</b>' + (isPaid ? '<span class="paidtag">PAID</span>' : '') + (ENR[String(i2)] && ENR[String(i2)].rt ? '<span class="lstars">&#11088;' + ENR[String(i2)].rt + ' <small>(' + ENR[String(i2)].rc + ' Google reviews)</small></span>' : '') + '<small>' + esc(v[1]) + (geo ? ' &middot; ' + distLabel(geoDist(i2)) : '') +
       (v[4] ? ' &middot; ' + esc(v[4].slice(0,52)) : '') + '</small></div>' +
       '<span class="tier ' + t.cls + '">' + t.label + '</span></div>';
   }
@@ -251,7 +259,9 @@ $('stateSel').addEventListener('change', function(){
     { k:'tier', val:0, icon: '&#127860;', label: 'GF options' },
     { k:'tier', val:3, icon: '&#127849;', label: 'Donuts' },
     { k:'tag',  val:1, icon: '&#127839;', label: 'Fryer' },
-    { k:'tag',  val:16, icon: '&#127838;', label: 'Bread' }
+    { k:'tag',  val:16, icon: '&#127838;', label: 'Bread' },
+    { k:'tag',  val:128, icon: '&#127807;', label: 'Vegan' },
+    { k:'tag',  val:256, icon: '&#129367;', label: 'Keto' }
   ];
   defs.forEach(function(d, i){
     if (d.k !== 'all' && d.k !== 'tier') {
@@ -492,7 +502,7 @@ function openVenue(idx){
       if (E.rt) h += '<div class="inforow">&#11088; <b>' + E.rt + '</b> <small>(' + E.rc + ' Google reviews)</small></div>';
       if (E.ph) h += '<div class="inforow">&#128222; <a href="tel:' + E.ph.replace(/[^+\d]/g, '') + '">' + esc(E.ph) + '</a> <small>&mdash; ring ahead, ask about GF practice</small></div>';
       if (E.hr) h += '<div class="inforow">&#128340; <small>' + esc(E.hr) + '</small></div>';
-      h += '<div class="verstamp">&#9989; Venue details verified ' + E.vd + ' via Google</div></div>';
+      h += '<div class="verstamp">&#9989; Venue details verified ' + E.vd + ' via Google &middot; <small>place data &copy; Google</small></div></div>';
       return h;
     })() +
     (v[4] ? '<div class="notesbox"><b>COMMUNITY NOTES</b>' + esc(v[4]) + '</div>' : '') +
@@ -502,6 +512,13 @@ function openVenue(idx){
         return h || '<span class="vic none"><small>No practice tags yet - add one in your review</small></span>';
       })() +
     '</div>' +
+    /* diet evidence note (mined 20 Nov): quote + honest source, no fake photo badges */
+    (function(){ var f = DIET_FLAGS && DIET_FLAGS[v[0].toLowerCase().replace(/[^a-z0-9]+/g, ' ').replace(/^ | $/g, '')];
+      if (!f || !f.q) return '';
+      var src = f.vs === 'venue' ? 'from the venue&#39;s own Google listing' : 'mentioned by reviewers on Google';
+      var d = f.v ? '🌱 Vegan friendly' : '🥑 Keto';
+      return '<div class="dietnote"><b>' + d + '</b> &mdash; &quot;' + esc(f.q) + '&quot; <small>(' + src + ')</small></div>';
+    })() +
     '<div class="actrow">' +
       '<a class="btn dirbtn" href="https://www.google.com/maps/dir/?api=1&destination=' + v[2] + ',' + v[3] + '" target="_blank" rel="noopener">&#129686; Directions</a>' +
       /* Tee rule: never scrape or store Google reviews - link out to the
@@ -805,7 +822,7 @@ $('saveEmail').addEventListener('click', function(){
 
 /* ---------- service worker ---------- */
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js?build=52').catch(function(){});
+  navigator.serviceWorker.register('sw.js?build=53').catch(function(){});
 }
 
 /* flush reviews saved on this phone while offline (club database sync) */

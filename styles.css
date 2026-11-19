@@ -204,6 +204,8 @@ input.comment{width:100%;border:1px solid var(--border);border-radius:12px;paddi
 .vic{font-size:18px}
 .vic small{font-size:9.5px;color:#2E4A33;font-weight:700}
 .vic.none{background:#F3F1EC;color:#8A948B;font-size:11px}
+.dietnote{background:#FDF8EF;border:1px solid #EBD9B8;border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.45;color:#5A4A2A;margin-top:8px}
+.dietnote small{color:#8A7A55;font-size:11px}
 .actrow{display:flex;gap:8px;margin:10px 0 6px}
 .dirbtn{flex:1;text-align:center;background:var(--green);color:#fff;font-weight:700;font-size:13px;border-radius:12px;padding:11px 8px;text-decoration:none;display:inline-block}
 .dirbtn.web{background:#fff;color:var(--green);border:1.5px solid var(--green)}
