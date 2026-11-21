@@ -822,7 +822,7 @@ $('saveEmail').addEventListener('click', function(){
 
 /* ---------- service worker ---------- */
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js?build=56').catch(function(){});
+  navigator.serviceWorker.register('sw.js?build=57').catch(function(){});
 }
 
 /* flush reviews saved on this phone while offline (club database sync) */
